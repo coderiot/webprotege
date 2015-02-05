@@ -1,0 +1,84 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+	<!-- xmlns:p='urn:import:edu.stanford.bmir.protege.web.client.ui.library.timelabel'> -->
+	<ui:style>
+	.thread-style {
+		/*line-height: 12px;*/
+		
+	}
+	  
+        .type-style {
+            color: #464646;
+        }
+        .browser-text-style {
+            color: #464646;
+            font-weight: bold;
+        }
+        .iri-style {
+            padding-left: 10px;
+            color: #a9a9a9;
+        }
+
+
+
+
+	
+	.button-bar-style {
+		padding: 2px;
+	}
+		.change-event-panel {
+		border-bottom: solid 1px silver;
+	}
+	
+	.user-name {
+		font-weight: bold;
+		color: #648dbe;
+	}
+	
+	.time {
+		color: #757575;
+	}
+	
+	.committed {
+		color: green;
+	}
+	
+	.uncommitted {
+		color: black;
+	}
+	</ui:style>
+
+	<g:HTMLPanel width="100%" height="100%">
+			<table>
+			<tr>
+				<td valign="top">
+					<div>
+						<div>
+							<g:FlexTable ui:field="AspectTable"/>
+						</div>
+						<!--<div style="padding-top: 5px;"> 
+						<p:ElapsedTimeLabel ui:field="timeLabel"
+							addStyleNames="{style.time}" />
+						</div> -->
+
+
+					</div>
+				</td>
+			</tr>
+		</table>
+		<g:ScrollPanel width="100%" height="90%">
+			<g:FlexTable width="100%" height="100%" ui:field="aspectTable" />
+		</g:ScrollPanel>
+		<p>
+      	<g:CheckBox ui:field="box" text="Box" />
+    	</p>
+    	<p>
+      	<g:InlineLabel ui:field="label" />
+ 	   </p>
+		<g:Button width="100%" height="10" ui:field='commit' addStyleNames="button-style"> Commit changes to
+			DBpedia
+		</g:Button>
+	</g:HTMLPanel>
+
+
+</ui:UiBinder>

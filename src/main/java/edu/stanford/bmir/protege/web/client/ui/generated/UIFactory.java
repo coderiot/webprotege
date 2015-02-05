@@ -34,6 +34,7 @@ import edu.stanford.bmir.protege.web.client.ui.projectfeed.ProjectFeedPortlet;
 import edu.stanford.bmir.protege.web.client.ui.tab.AbstractTab;
 import edu.stanford.bmir.protege.web.client.ui.tab.UserDefinedTab;
 import edu.stanford.bmir.protege.web.client.usage.UsagePortlet;
+import fu.berlin.csw.AspectPortlet.client.ui.AspectPortlet;
 
 import java.util.*;
 
@@ -185,6 +186,9 @@ public class UIFactory {
             else if (portletJavaClassName.endsWith(OWLEntityDescriptionEditorPortlet.class.getName())) {
                 return new OWLEntityDescriptionEditorPortlet(project);
             }
+            else if (portletJavaClassName.endsWith(AspectPortlet.class.getName())) {
+                return new AspectPortlet(project);
+            }
         } catch (Exception e) {
             GWT.log("Error when creating portlet", e);
         }
@@ -225,7 +229,8 @@ public class UIFactory {
                 OBOTermRelationshipPortlet.class.getName(), OBOTermSynonymsPortlet.class.getName(),
                 OBOTermIdEditorPortlet.class.getName(),
                 OBOTermDefinitionPortlet.class.getName(), OBOTermXRefsEditorPortlet.class.getName(),
-                RevisionsPortlet.class.getName()};
+                RevisionsPortlet.class.getName(),
+                AspectPortlet.class.getName()};
 
         List<String> portletsList = Arrays.asList(portlets);
         Collections.sort(portletsList, new Comparator<String>() {

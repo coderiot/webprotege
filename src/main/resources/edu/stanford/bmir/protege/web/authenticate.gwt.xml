@@ -20,6 +20,8 @@
     <inherits name="com.google.gwt.inject.Inject"/>
 	<inherits name='com.gwtext.GwtExt' />
 	<inherits name='com.google.gwt.resources.Resources' />
+    <inherits name="fu.berlin.csw.AspectPortlet.client.rpc.AspectRPC"/>
+    <inherits name="fu.berlin.csw.AspectPortlet.client.ui.AspectPortlet"/>
 
     <inherits name="org.semanticweb.owlapi.gwt.owlapi"/>
 

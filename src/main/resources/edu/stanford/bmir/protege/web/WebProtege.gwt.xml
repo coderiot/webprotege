@@ -26,8 +26,11 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="edu.stanford.bmir.gwtcodemirror.CodeMirror"/>
+    <inherits name="fu.berlin.csw.AspectPortlet.client.rpc.AspectRPC"/>
+    <inherits name="fu.berlin.csw.AspectPortlet.client.ui.AspectPortlet"/>
 
-	<inherits name='com.googlecode.gwt.crypto.Crypto'/>
+
+    <inherits name='com.googlecode.gwt.crypto.Crypto'/>
 
     <inherits name="org.semanticweb.owlapi.gwt.owlapi"/>
 
