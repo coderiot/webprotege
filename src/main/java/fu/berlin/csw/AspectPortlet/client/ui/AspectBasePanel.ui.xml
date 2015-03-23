@@ -69,15 +69,6 @@
 		<g:ScrollPanel width="100%" height="90%">
 			<g:FlexTable width="100%" height="100%" ui:field="aspectTable" />
 		</g:ScrollPanel>
-		<p>
-      	<g:CheckBox ui:field="box" text="Box" />
-    	</p>
-    	<p>
-      	<g:InlineLabel ui:field="label" />
- 	   </p>
-		<g:Button width="100%" height="10" ui:field='commit' addStyleNames="button-style"> Commit changes to
-			DBpedia
-		</g:Button>
 	</g:HTMLPanel>
 
 

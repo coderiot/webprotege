@@ -13,7 +13,6 @@
     <source path="shared"/>
     <source path="resources"/>
 
-
     <inherits name='com.google.gwt.junit.JUnit'/>
 
     <inherits name="com.google.gwt.user.User"/>
@@ -26,8 +25,9 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="edu.stanford.bmir.gwtcodemirror.CodeMirror"/>
-    <inherits name="fu.berlin.csw.AspectPortlet.client.rpc.AspectRPC"/>
-    <inherits name="fu.berlin.csw.AspectPortlet.client.ui.AspectPortlet"/>
+    <inherits name="fu.berlin.csw.AspectPortlet.AspectPortlet"/>
+    <inherits name="com.google.gwt.logging.Logging"/>
+
 
 
     <inherits name='com.googlecode.gwt.crypto.Crypto'/>

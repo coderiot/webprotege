@@ -1,0 +1,123 @@
+package fu.berlin.csw.AspectPortlet.server;
+
+import fu.berlin.csw.AspectPortlet.client.ui.Message;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
+
+import edu.stanford.bmir.protege.web.server.WebProtegeRemoteServiceServlet;
+import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
+import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProjectManager;
+import edu.stanford.bmir.protege.web.shared.event.ProjectChangedEvent;
+import edu.stanford.bmir.protege.web.shared.project.ProjectId;
+import edu.stanford.bmir.protege.web.server.logging.DefaultLogger;
+import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
+
+import fu.berlin.csw.AspectPortlet.client.rpc.AspectService;
+
+import java.util.List;
+import java.util.logging.Logger;
+
+public class AspectServiceImpl extends WebProtegeRemoteServiceServlet
+implements AspectService{
+	
+	private ProjectId projectId;
+
+	@Override
+	public void postChangeEvent(ProjectId projectId, ProjectChangedEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void init(ProjectId projectId) {
+
+        Logger logger = Logger.getLogger(AspectServiceImpl.class.getName());
+
+
+        this.projectId = projectId;
+
+        logger.info("Der Logger loggt");
+
+		OWLAPIProject project = OWLAPIProjectManager.getProjectManager()
+				.getProject(projectId);
+
+
+		
+		/*for (OWLOntology ont : project.getRootOntology().getDirectImports()){
+            logger.info("Der Logger loggt");
+        }*/
+
+        for (OWLClass owlClass : project.getRootOntology().getClassesInSignature()){
+
+        }
+
+        OWLOntology rootOnt = project.getRootOntology();
+
+
+
+        for (OWLClass owlClass : rootOnt.getClassesInSignature()){
+
+            if (owlClass.getIRI().equals(IRI.create("http://www.corporate-semantic-web.de/ontologies/aspect_owl#FunctionalAspect"))){
+
+                for (OWLClass funcAspect : project.getClassHierarchyProvider().getDescendants(owlClass)){
+                    logger.info("Nachfahren von Functional Aspect: " + funcAspect);
+                };
+
+            }
+
+        }
+
+
+
+        /*if (rootOnt.containsClassInSignature
+                (IRI.create("http://www.corporate-semantic-web.de/ontologies/aspect_owl#FunctionalAspect"))){
+            OWLClass owlClass = getClass(rootOnt, className);
+        }*/
+
+		
+		
+	}
+
+	@Override
+	public List<OWLClass> getAspects(ProjectId input) {
+        Logger logger = Logger.getLogger(AspectServiceImpl.class.getName());
+
+
+        this.projectId = projectId;
+
+        logger.info("Der Logger loggt");
+
+        OWLAPIProject project = OWLAPIProjectManager.getProjectManager()
+                .getProject(projectId);
+
+
+
+		/*for (OWLOntology ont : project.getRootOntology().getDirectImports()){
+            logger.info("Der Logger loggt");
+        }*/
+
+        for (OWLClass owlClass : project.getRootOntology().getClassesInSignature()){
+
+        }
+
+        OWLOntology rootOnt = project.getRootOntology();
+
+        LinkedListyy<>
+
+        for (OWLClass owlClass : rootOnt.getClassesInSignature()){
+
+            if (owlClass.getIRI().equals(IRI.create("http://www.corporate-semantic-web.de/ontologies/aspect_owl#FunctionalAspect"))){
+
+                for (OWLClass funcAspect : project.getClassHierarchyProvider().getDescendants(owlClass)){
+                    logger.info("Nachfahren von Functional Aspect: " + funcAspect);
+                };
+
+            }
+
+        }
+
+        return
+    }
+
+}

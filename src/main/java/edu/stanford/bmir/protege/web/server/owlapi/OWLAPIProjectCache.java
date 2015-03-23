@@ -60,7 +60,8 @@ public class OWLAPIProjectCache {
      * be purged).  This can interact with the frequency with which clients poll the project event queue (which is
      * be default every 10 seconds).
      */
-    private static final long DORMANT_PROJECT_TIME_MS = 3 * 60 * 1000;
+    //private static final long DORMANT_PROJECT_TIME_MS = 3 * 60 * 1000;
+    private static final long DORMANT_PROJECT_TIME_MS =  300 * 60 * 1000;  //TODO purge time zurücksetzen
 
 
     public OWLAPIProjectCache() {
@@ -98,7 +99,7 @@ public class OWLAPIProjectCache {
             long time = getLastAccessTime(projectId);
             long lastAccessTimeDiff = System.currentTimeMillis() - time;
             if (time == 0 || lastAccessTimeDiff > DORMANT_PROJECT_TIME_MS) {
-                purge(projectId);
+                /purge(projectId);
             }
         }
     }

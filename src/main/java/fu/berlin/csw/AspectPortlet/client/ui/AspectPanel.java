@@ -44,11 +44,11 @@ public class AspectPanel extends Composite implements AspectItemDisplay {
 
 
 
-    public void setDisplay() {
-        typeLabel.setText("Type Label");
-        browserTextLabel.setText("Browser Text");
-        iriLabel.setText("IRI");
-        box.setText("Checkbox Text");
+    public void setDisplay(String typeLabel, String browserText, String iriLabel) {
+        this.typeLabel.setText(typeLabel);
+        browserTextLabel.setText(browserText);
+        this.iriLabel.setText(iriLabel);
+        box.setText(iriLabel);
     }
 
 

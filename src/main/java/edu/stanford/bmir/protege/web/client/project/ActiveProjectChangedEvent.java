@@ -27,6 +27,7 @@ public class ActiveProjectChangedEvent extends WebProtegeEvent<ActiveProjectChan
         this.projectId = checkNotNull(newProjectId).orNull();
     }
 
+
     /**
      * Gets the project id of the new active project.
      * @return An optional {@link ProjectId} which, if present correponds to the id of the new active project.
