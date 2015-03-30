@@ -132,8 +132,13 @@
 		<servlet-name>ProjectUploadServlet</servlet-name>
 		<servlet-class>edu.stanford.bmir.protege.web.server.filesubmission.FileUploadServlet</servlet-class>
 	</servlet>
+    <servlet>
+        <servlet-name>fu.berlin.csw.AspectPortlet.AspectPortlet AspectService</servlet-name>
+        <servlet-class>fu.berlin.csw.AspectPortlet.server.AspectServiceImpl</servlet-class>
+    </servlet>
 
-	<!-- Servlet mappings -->
+
+    <!-- Servlet mappings -->
 
     <servlet-mapping>
 		<servlet-name>DispatchService</servlet-name>
@@ -240,9 +245,13 @@
 		<servlet-name>SharingSettingsService</servlet-name>
 		<url-pattern>/webprotege/sharingsettings</url-pattern>
 	</servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>fu.berlin.csw.AspectPortlet.AspectPortlet AspectService</servlet-name>
+        <url-pattern>/webprotege/aspect</url-pattern>
+    </servlet-mapping>
 
 
-	<!-- Default page to serve -->
+    <!-- Default page to serve -->
 	
 	<welcome-file-list>
 		<welcome-file>WebProtege.jsp</welcome-file>
