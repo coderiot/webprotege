@@ -99,7 +99,7 @@ public class OWLAPIProjectCache {
             long time = getLastAccessTime(projectId);
             long lastAccessTimeDiff = System.currentTimeMillis() - time;
             if (time == 0 || lastAccessTimeDiff > DORMANT_PROJECT_TIME_MS) {
-                /purge(projectId);
+                purge(projectId);
             }
         }
     }
