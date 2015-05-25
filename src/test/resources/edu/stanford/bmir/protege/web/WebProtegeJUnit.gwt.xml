@@ -7,5 +7,6 @@
     <source path="client"/>
     <source path="shared"/>
 
+    <inherits name='fu.berlin.csw.dl_learner.DLLearner' />
 
 </module>
