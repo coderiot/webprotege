@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.gwtext.client.widgets.layout.FitLayout;
-import edu.stanford.bmir.protege.web.client.ui.library.msgbox.MessageBox;
 import edu.stanford.bmir.protege.web.client.ui.portlet.AbstractOWLEntityPortlet;
 import edu.stanford.bmir.protege.web.shared.event.HasEventHandlerManagement;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
@@ -24,7 +23,9 @@ public class DLLearnerBasePanel extends Composite {
 
     HasEventHandlerManagement eventHandlerMan;
 
-    AbstractOWLEntityPortlet wrapperPortlet;
+    DLLearnerPortlet wrapperPortlet;
+
+    SuggestionPresenter presenter;
 
     @UiTemplate("DLLearnerBasePanel.ui.xml")
     interface MyUiBinder extends UiBinder<Widget, DLLearnerBasePanel> {
@@ -38,7 +39,7 @@ public class DLLearnerBasePanel extends Composite {
 
 
     public DLLearnerBasePanel(final ProjectId projectId,
-                           HasEventHandlerManagement eventHandlerMan, AbstractOWLEntityPortlet wrapperPortlet) {
+                           HasEventHandlerManagement eventHandlerMan, DLLearnerPortlet wrapperPortlet) {
 
         this.projectId = projectId;
 
@@ -46,10 +47,14 @@ public class DLLearnerBasePanel extends Composite {
 
         this.wrapperPortlet = wrapperPortlet;
 
-
         initWidget(uiBinder.createAndBindUi(this));
 
     }
+
+    public void setPresenter(SuggestionPresenter presenter){
+        this.presenter = presenter;
+    }
+
 
 
     @UiHandler("commit")
@@ -61,13 +66,21 @@ public class DLLearnerBasePanel extends Composite {
         window.setHeight(365);
         window.setLayout(new FitLayout());
 
-        DLLearnerPanel dllearnerPanel = new DLLearnerPanel();
+        //DLLearnerPanel dllearnerPanel = new DLLearnerPanel(wrapperPortlet, null);
 
-        dllearnerPanel.setSelectedEntity(wrapperPortlet.getSelectedEntity().get());
+        //dllearnerPanel.setSelectedEntity(wrapperPortlet.getSelectedEntity().get());
 
-        window.add(dllearnerPanel);
 
-        window.show();
+        SuggestionsWindow suggList = new SuggestionsWindow(wrapperPortlet);
+
+        suggList.show();
+
+
+        //window.add(suggList);
+
+        //window.show();
+
+
 
         //MessageBox.showAlert(new Boolean(wrapperPortlet.getSelectedEntity().isPresent()).toString());
     }

@@ -56,6 +56,7 @@
 		<servlet-class>edu.stanford.bmir.protege.web.server.filesubmission.FileUploadServlet</servlet-class>
 	</servlet>
 
+
 	<!-- Servlet mappings -->
 
     <servlet-mapping>
@@ -88,7 +89,7 @@
 		<url-pattern>/webprotege/bioportalapi</url-pattern>
 	</servlet-mapping>
 
-	<!-- Default page to serve -->
+    <!-- Default page to serve -->
 	
 	<welcome-file-list>
 		<welcome-file>WebProtege.jsp</welcome-file>

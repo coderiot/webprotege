@@ -3,8 +3,14 @@
         "http://google-web-toolkit.googlecode.com/svn/tags/2.5.1/distro-source/core/src/gwt-module.dtd">
 
 <module rename-to='dl_learner'>
+
+
     <inherits name="com.google.gwt.resources.Resources"/>
+    <inherits name="com.google.gwt.user.User"/>
     <inherits name="edu.stanford.bmir.protege.web.WebProtege" />
+
+
+
 
     <source path="" />
 </module>
