@@ -59,6 +59,8 @@ public class AspectBasePanel extends Composite {
 
 	final private static AspectServiceAsync proxy = (AspectServiceAsync) GWT.create(AspectService.class);
 
+    private Aspects checkedAspects;
+
 	private AsyncCallback<Aspects> callbackAspects;
 	private AsyncCallback<Void> callbackVoid;
 
@@ -99,6 +101,11 @@ public class AspectBasePanel extends Composite {
 			}
 
 			public void onSuccess(Aspects result) {
+
+                aspectTable.clear();
+
+                GWT.log("getAspects success!");
+
 				List<IRI> aspects = result.getAspects();
 
                 callbackVoid = new AsyncCallback<Void>() {
@@ -115,9 +122,11 @@ public class AspectBasePanel extends Composite {
 
                 for (IRI aspect : aspects){
 
+                    GWT.log("Aspect: " + aspect);
+
                     final CheckBox cb = new CheckBox(aspect.toString());
 
-                    final AspectPanel asPanel = new AspectPanel();
+
 
                     //asPanel.setDisplay("Aspect", aspect.toString(), "");
 
@@ -138,10 +147,15 @@ public class AspectBasePanel extends Composite {
                         }
                     });
 
+                    if (result.getChecketAspects().contains(aspect)){
+                        GWT.log("add checked aspect to basePanel");
+                        cb.setValue(true);
+                    }
+
 
                     aspectTable.insertRow(0);
 
-                    System.out.println("Zeile wurde hinzugefügt");
+                    GWT.log("Zeile wurde hinzugefügt");
 
 
                     aspectTable.setWidget(0, 0, cb);

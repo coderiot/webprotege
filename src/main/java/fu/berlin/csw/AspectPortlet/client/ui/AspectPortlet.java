@@ -15,6 +15,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.gwt.logging.client.HasWidgetsLogHandler;
 import com.google.gwt.logging.client.LoggingPopup;
+import edu.stanford.bmir.protege.web.shared.entity.OWLEntityData;
+import edu.stanford.bmir.protege.web.shared.event.ProjectChangedEvent;
+import edu.stanford.bmir.protege.web.shared.event.ProjectChangedHandler;
+import org.semanticweb.owlapi.model.IRI;
 
 
 /**
@@ -47,6 +51,25 @@ public class AspectPortlet extends AbstractOWLEntityPortlet {
         setSize(300, 68);
         add(basePanel);
 
+
+        addProjectEventHandler(ProjectChangedEvent.TYPE, new ProjectChangedHandler() {
+            @Override
+            public void handleProjectChanged(ProjectChangedEvent event) {
+
+                for ( OWLEntityData entity : event.getSubjects() ){
+                    if (entity.getEntity().isOWLClass()){
+
+
+                        if ((entity.getEntity().asOWLClass().getIRI().toString().contains("Aspect"))){
+
+                            basePanel.getAspects();
+
+                        }
+                    }
+                }
+
+            }
+        });
     }
 
     @Override

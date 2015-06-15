@@ -20,6 +20,7 @@ public class Aspects implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private List<IRI> aspects;
+    private LinkedList<IRI> checkedAspects;
     public Aspects(){
         aspects = new LinkedList<IRI>();
     };
@@ -31,6 +32,14 @@ public class Aspects implements Serializable {
     }
     public void addAspect(IRI iri){
         aspects.add(iri);
+    }
+
+    public void setCheckedAspects(LinkedList<IRI> checkedAspects){
+        this.checkedAspects = checkedAspects;
+    }
+
+    public LinkedList<IRI> getChecketAspects(){
+        return this.checkedAspects;
     }
 
     public void removeAspect(IRI iri){

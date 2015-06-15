@@ -45,7 +45,7 @@ public class AspectAssertionChangeListener implements OWLOntologyChangeListener 
 
         List<OWLAnnotation> checkedAspectList = new LinkedList<OWLAnnotation>();
 
-        for (IRI aspect : caller.getCheckedAspects().getAspects()){
+        for (IRI aspect : caller.getCheckedAspects()){
             OWLAnnotation ann=dF.getOWLAnnotation(annProp, aspect);
             checkedAspectList.add(ann);
         }

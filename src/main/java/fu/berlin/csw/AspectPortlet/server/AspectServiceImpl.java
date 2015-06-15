@@ -26,9 +26,9 @@ implements AspectService{
 
     private ProjectId projectId;
 
-    private Aspects checkedAspects;
+    private LinkedList<IRI> checkedAspects;
 
-
+    private boolean initiated = false;
 
     @Override
 	public void init(ProjectId projectId) {
@@ -63,6 +63,25 @@ implements AspectService{
 	@Override
 	public Aspects getAspects(ProjectId input) {
 
+        if (!initiated){
+            this.projectId = input;
+
+            OWLAPIProject project = OWLAPIProjectManager.getProjectManager()
+                    .getProject(projectId);
+
+            UserId user = getUserInSession();
+            OWLOntologyManager oM =  project.getRootOntology().getOWLOntologyManager();
+
+            checkedAspects = new LinkedList<IRI>();
+            AspectAssertionChangeListener aACL = new AspectAssertionChangeListener();
+            aACL.setChangeEnvironment(projectId, user, oM, this);  // todo remove oM
+
+            oM.addOntologyChangeListener(aACL);
+
+            initiated = true;
+
+        }
+
         final Logger logger = Logger.getLogger(AspectServiceImpl.class.getName());
 
 
@@ -78,31 +97,34 @@ implements AspectService{
 
         for (OWLClass owlClass : rootOnt.getClassesInSignature()){
 
-            if ((owlClass.getIRI().equals(IRI.create("http://www.corporate-semantic-web.de/ontologies/aspect_owl#FunctionalAspect")))
-                    || (owlClass.getIRI().equals(IRI.create("http://www.corporate-semantic-web.de/ontologies/aspect_owl#NonfunctionalAspect")))){
+            if ((owlClass.getIRI().toString().contains("Aspect"))){
 
-                logger.info("FunctionalAspect gefunden!");
 
-                for (OWLClass funcAspect : project.getClassHierarchyProvider().getDescendants(owlClass)){
-                    logger.info("Nachfahren von Functional Aspect: " + funcAspect);
-                    funcAspects.add(funcAspect.getIRI());
-                };
+            //IRI.create("http://www.corporate-semantic-web.de/ontologies/aspect_owl#FunctionalAspect")))
+            //        || (owlClass.getIRI().equals(IRI.create("http://www.corporate-semantic-web.de/ontologies/aspect_owl#NonfunctionalAspect")))){
+
+                logger.info("Aspect gefunden!");
+
+                funcAspects.add(owlClass.getIRI());
+
+            //    for (OWLClass funcAspect : project.getClassHierarchyProvider().getDescendants(owlClass)){
+            //        logger.info("Nachfahren von Functional Aspect: " + funcAspect);
+            //        funcAspects.add(funcAspect.getIRI());
+            //    };
             }
         }
 
         Aspects result = new Aspects();
         result.setAspects(funcAspects);
-        checkedAspects = new Aspects();
-
-        UserId user = getUserInSession();
-        OWLOntologyManager oM =  project.getRootOntology().getOWLOntologyManager();
 
 
-        AspectAssertionChangeListener aACL = new AspectAssertionChangeListener();
-        aACL.setChangeEnvironment(projectId, user, oM, this);  // todo remove oM
+        for (IRI iri : checkedAspects){
+            if (!result.getAspects().contains(iri)){
+                checkedAspects.remove(iri);
+            }
+        }
 
-        oM.addOntologyChangeListener(aACL);
-
+        result.setCheckedAspects(checkedAspects);
 
         return result;
     }
@@ -153,20 +175,20 @@ implements AspectService{
     public void addCheckedAspect(IRI iri){
         final Logger logger = Logger.getLogger(AspectServiceImpl.class.getName());
         logger.info("add IRI: " + iri.toString());
-        checkedAspects.addAspect(iri);
+        checkedAspects.add(iri);
     }
 
     @Override
     public void removeUnCheckedAspect(IRI iri){
         final Logger logger = Logger.getLogger(AspectServiceImpl.class.getName());
         logger.info("remove IRI: " + iri.toString());
-        checkedAspects.removeAspect(iri);
+        checkedAspects.remove(iri);
     }
 
 
 
 
-    public Aspects getCheckedAspects(){
+    public LinkedList<IRI> getCheckedAspects(){
         return this.checkedAspects;
     }
 }
