@@ -48,7 +48,7 @@ public class AspectPortlet extends AbstractOWLEntityPortlet {
     public void initialize() {
         basePanel = new AspectBasePanel(getProjectId(), this);
         setTitle("Aspect");
-        setSize(300, 68);
+        setSize(300, 300);
         add(basePanel);
 
 
