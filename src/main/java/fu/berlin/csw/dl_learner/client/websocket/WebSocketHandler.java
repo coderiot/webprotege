@@ -4,7 +4,7 @@ package fu.berlin.csw.dl_learner.client.websocket;
  * Created by lars on 04.06.15.
  */
 
-import fu.berlin.csw.dl_learner.shared.Suggestion;
+import fu.berlin.csw.dl_learner.shared.ServerReply;
 
 public interface WebSocketHandler {
 
@@ -12,7 +12,7 @@ public interface WebSocketHandler {
 
     void onError(String error);
 
-    void onMessage(Suggestion suggestion);
+    void onMessage(ServerReply suggestion);
 
     void onOpen();
 

@@ -4,7 +4,8 @@ import edu.stanford.bmir.protege.web.server.inject.WebProtegeInjector;
 import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
-import fu.berlin.csw.dl_learner.server.websocket.SuggestionWebSocketServer;
+import fu.berlin.csw.dl_learner.server.websocket.SuggestionsWebSocketServer;
+import fu.berlin.csw.dl_learner.shared.InitLearningProcessException;
 import org.dllearner.core.ComponentInitException;
 import org.glassfish.tyrus.server.Server;
 import org.semanticweb.owlapi.model.AxiomType;
@@ -35,7 +36,7 @@ public class Manager {
             /* Init Server for suggestion streaming and logger */
 
             try {
-                server = new Server("localhost", 8025, "/", null,SuggestionWebSocketServer.class);
+                server = new Server("localhost", 8025, "/", null,SuggestionsWebSocketServer.class);
                 server.start();
                 logger.info("[DLLearner Plugin] start suggestions-stream-webservice");
             } catch (final DeploymentException e1) {
@@ -48,7 +49,7 @@ public class Manager {
     }
 
 
-    public void startLearnProcess(OWLAPIProject project, OWLEntity selectedEntity) throws Exception{
+    public void initLearnProcess(OWLAPIProject project, OWLEntity selectedEntity) {
 
         ClassDescriptionLearner classDescriptionLearner = null;
 
@@ -70,8 +71,8 @@ public class Manager {
 
             classDescriptionLearner.setAxiomType(AxiomType.EQUIVALENT_CLASSES);            // TODO: generic solution
             classDescriptionLearner.setEntity(selectedEntity);
-            classDescriptionLearner.initKnowledgeSource(ReasonerType.SPARQL_REASONER);     // TODO: generic solution
-            classDescriptionLearner.initReasoner(ReasonerType.SPARQL_REASONER);
+            classDescriptionLearner.initKnowledgeSource(ReasonerType.HERMIT_REASONER);     // TODO: generic solution
+            classDescriptionLearner.initReasoner(ReasonerType.HERMIT_REASONER);
             classDescriptionLearner.initLearningProblem();
             classDescriptionLearner.initLearningAlgorithm();
 
@@ -79,21 +80,21 @@ public class Manager {
 
             logger.info("[DLLearner Plugin] Start learning.");
 
-            classDescriptionLearner.startLearning();
-
-
 
 
         }
         catch(ComponentInitException e){
             e.printStackTrace();
+            throw new InitLearningProcessException(e.getMessage());
         }
 
         catch(Exception e){
             e.printStackTrace();
+            throw new InitLearningProcessException(e.getMessage());
         }
         catch(Error e){
             e.printStackTrace();
+            throw new InitLearningProcessException(e.getMessage());
         }
 
 

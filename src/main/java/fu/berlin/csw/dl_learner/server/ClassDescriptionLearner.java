@@ -31,7 +31,5 @@ public interface ClassDescriptionLearner {
 
     public void init(ReasonerType reasonerType) throws Exception;
 
-    public boolean isActive();
-
 
 }

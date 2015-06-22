@@ -4,6 +4,7 @@ package fu.berlin.csw.dl_learner.server.websocket;
  * Created by lars on 04.06.15.
  */
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -22,38 +23,39 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamReader;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProjectManager;
-import fu.berlin.csw.dl_learner.server.GetSuggestionsActionHandler;
 import fu.berlin.csw.dl_learner.server.Manager;
-import fu.berlin.csw.dl_learner.shared.Suggestion;
+import fu.berlin.csw.dl_learner.shared.ServerReply;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
+import org.dllearner.utilities.owl.OWLAPIRenderers;
 
-@ServerEndpoint(value = "/chat/{projectId}")
-public class SuggestionWebSocketServer {
+@ServerEndpoint(value = "/suggestions/{projectId}")
+public class SuggestionsWebSocketServer {
 
     private Session session;
     private HttpSession httpSession;
     private OWLAPIProjectManager projectManager;
 
-    private static Logger logger = Logger.getLogger(SuggestionWebSocketServer.class
+    private static Logger logger = Logger.getLogger(SuggestionsWebSocketServer.class
             .getName());
 
 
     @OnMessage
     public void onMessage(@PathParam("projectId") String projectIdString, String message, final Session session) {
 
+        final List<EvaluatedDescriptionClass> alreadySendDescriptions = new LinkedList<>();
 
-        Timer timer = new Timer();
 
-        logger.info("message: " + message);
-        logger.info("session: " + session);
+        final Timer timer = new Timer();
 
         try {
             final SuggestionRequest request = deserializeSuggestionRequest(message);
 
-            logger.info("deserialized suggestionRequest: data: " + request.getData());
-            logger.info("deserialized suggestionRequest project ID: projectId: " + request.getProjectId());
+            logger.info("[DLLearner] deserialized suggestionRequest: data: " + request.getData());
+            logger.info("[DLLearner] deserialized suggestionRequest project ID: projectId: " + request.getProjectId());
 
+
+            // ask for solutions and send them to the client gradually
 
             timer.schedule(new TimerTask() {
                 int i = 0;
@@ -64,73 +66,65 @@ public class SuggestionWebSocketServer {
                 public void run() {
                     //setProgress(progress);
 
-                    if (Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).isActive()){
-                        learningHasStarted = true;
-
-                        result = Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions();
-                        logger.info("Currently learned descriptions: " + result.toString());
-                        if(result.size()>i){
-                            Suggestion suggestion = new Suggestion();
-                            suggestion.setData("Suggestion: " + Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions().get(i));
-                            suggestion.setUsername("Lars");
-                            sendSuggestion(suggestion, session);
-                            i++;
-                        }
-                    } else if (learningHasStarted == true) {
-                        result = Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions();
-                        logger.info("Currently learned descriptions: " + result.toString());
-                        if(result.size()>i){
-                            Suggestion suggestion = new Suggestion();
-                            suggestion.setData("Suggestion: " + Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions().get(i));
-                            suggestion.setUsername("Lars");
-                            sendSuggestion(suggestion, session);
-                            i++;
-                        }
-
-                        this.cancel();
-                    }
-
 
                     /*das geht schöner!*/
-                    /*if ( !isCancelled() && Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).isLearning()) {
-
-                            learningHasStarted = true;
+                    if ( /*!isCancelled() &&*/  Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).isLearning()) {
 
                             result = Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions();
-                            logger.info("Currently learned descriptions: " + result.toString());
+                            logger.info("[DLLearner] Currently learned descriptions: " + result.toString());
                             if(result.size()>i){
-                                Suggestion suggestion = new Suggestion();
-                                suggestion.setData("Suggestion: " + Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions().get(i));
-                                suggestion.setUsername("Lars");
-                                sendSuggestion(suggestion, session);
+
+                                for (EvaluatedDescriptionClass descr : Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions()){
+                                    if (!alreadySendDescriptions.contains(descr)){
+                                        alreadySendDescriptions.add(descr);
+                                        ServerReply suggestion = new ServerReply();
+                                        suggestion.setData(OWLAPIRenderers.toManchesterOWLSyntax(descr.getDescription()));
+                                        suggestion.setAccuracy(new Double(descr.getAccuracy()).toString());
+                                        logger.info("[DLLearner] Send suggestion : " + result.toString());
+                                        sendSuggestion(suggestion, session);
+                                    }
+                                }
+
                                 i++;
                             }
-                    } else if (learningHasStarted){
-                        result = Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions();
-                        logger.info("Currently learned descriptions: " + result.toString());
-                        if(result.size()>i){
-                            Suggestion suggestion = new Suggestion();
-                            suggestion.setData("Suggestion: " + Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).getCurrentlyLearnedDescriptions().get(i));
-                            suggestion.setUsername("Lars");
-                            sendSuggestion(suggestion, session);
-                            i++;
-                        }
 
-                        this.cancel();
-                    }*/
+                    }
                 }
 
-            }, 1000, 500);
-
-            //Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).startLearning();
+            }, 10, 500);
 
 
-        } catch (final /*Serialization*/Exception e ) {
-            logger.log(Level.WARNING, "Error on web socket server", e);
+            Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).startLearning();
+
+            // Wait 500ms to make sure that all solutions have already been send to the client
+
+            Timer timer2 = new Timer();
+
+            timer2.schedule(new TimerTask(){
+                @Override
+                public void run() {
+                    timer.cancel();
+                    ServerReply suggestion = new ServerReply();
+                    suggestion.setData("Finished");
+                    suggestion.setUsername("Lars");
+                    sendSuggestion(suggestion, session);
+                }
+            }, 500);
+
+
+        } catch (Exception e ) {
+
+
+            logger.log(Level.SEVERE, "[DLLearner] Error on web socket server", e);
             timer.cancel();
+
+            ServerReply suggestion = new ServerReply();
+            suggestion.setData("Error");
+            suggestion.setUsername("Lars");
+            suggestion.setException(e);
+            sendSuggestion(suggestion, session);
+
         }
-
-
 
     }
 
@@ -140,14 +134,14 @@ public class SuggestionWebSocketServer {
     public void onOpen(@PathParam("projectId") String projectIdString, Session session, EndpointConfig conf) {
         this.session = session;    // Todo: add multiple opened sessions
 
-        logger.log(Level.INFO, "Connection open for:" + session.getId());
+        logger.log(Level.INFO, "[DLLearner] Connection open for:" + session.getId());
 
     }
 
 
-    /*   Serialization for Suggestion      */
+    /*   Serialization      */
 
-    private Suggestion deserializeSuggestion(String data)
+    private ServerReply deserializeSuggestion(String data)
             throws SerializationException {
         final ServerSerializationStreamReader streamReader = new ServerSerializationStreamReader(
                 Thread.currentThread().getContextClassLoader(),
@@ -155,11 +149,11 @@ public class SuggestionWebSocketServer {
         // Filling stream reader with data
         streamReader.prepareToRead(data);
         // Reading deserialized object from the stream
-        final Suggestion suggestion = (Suggestion) streamReader.readObject();
+        final ServerReply suggestion = (ServerReply) streamReader.readObject();
         return suggestion;
     }
 
-    private String serializeSuggestion(final Suggestion messageDto)
+    private String serializeSuggestion(final ServerReply messageDto)
             throws SerializationException {
         final ServerSerializationStreamWriter serverSerializationStreamWriter = new ServerSerializationStreamWriter(
                 new SimpleSerializationPolicy());
@@ -196,7 +190,9 @@ public class SuggestionWebSocketServer {
     }
 
 
-    private void sendSuggestion(Suggestion suggestion, Session session) {
+
+
+    private void sendSuggestion(ServerReply suggestion, Session session) {
 
         String result = null;
         try {

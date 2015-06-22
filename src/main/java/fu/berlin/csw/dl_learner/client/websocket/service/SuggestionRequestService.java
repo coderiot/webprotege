@@ -6,7 +6,7 @@ package fu.berlin.csw.dl_learner.client.websocket.service;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import fu.berlin.csw.dl_learner.shared.Suggestion;
+import fu.berlin.csw.dl_learner.shared.ServerReply;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
 
 /**
@@ -15,7 +15,7 @@ import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
     @RemoteServiceRelativePath("SuggestionRequestService")
     public interface SuggestionRequestService extends RemoteService {
 
-        Suggestion getMessage(SuggestionRequest suggestion);
+        ServerReply getMessage(SuggestionRequest suggestion);
 
 
 }

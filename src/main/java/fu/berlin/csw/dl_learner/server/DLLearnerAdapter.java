@@ -7,6 +7,7 @@ package fu.berlin.csw.dl_learner.server;
 import edu.stanford.bmir.protege.web.server.inject.WebProtegeInjector;
 import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
+import edu.stanford.bmir.protege.web.server.owlapi.change.OWLAPIChangeManager;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.core.AbstractReasonerComponent;
 import org.dllearner.core.KnowledgeSource;
@@ -42,7 +43,6 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     private OWLEntity selEntity;
     private AxiomType axiomType;
     private static WebProtegeLogger logger = WebProtegeInjector.get().getInstance(WebProtegeLogger.class);
-    private static boolean isActive = false;  // TODO
 
 
     public DLLearnerAdapter(OWLAPIProject project){
@@ -92,12 +92,12 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             RhoDRDown op = new RhoDRDown();
             op.setReasoner(reasoner);
             op.setUseNegation(false);//useNegation);
-            op.setUseHasValueConstructor(true);//useAllConstructor);
-            op.setUseCardinalityRestrictions(true);//useCardinalityRestrictions);
+            op.setUseAllConstructor(false);//useAllConstructor);
+            op.setUseCardinalityRestrictions(false);//useCardinalityRestrictions);
             //if(useCardinalityRestrictions){
-                op.setCardinalityLimit(5);//cardinalityLimit);
+            op.setCardinalityLimit(5);//cardinalityLimit);
             //}
-            op.setUseExistsConstructor(true);//useExistsConstructor);
+            op.setUseExistsConstructor(false);//useExistsConstructor);
             op.setUseHasValueConstructor(false);//useHasValueConstructor);
             op.init();
 
@@ -132,7 +132,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
 
     private void initSparqlReasoner() throws Exception{
-        logger.info("[DLLearner Plugin] init SparqlReasoner...");
+        logger.info("[DLLearner] init SparqlReasoner...");
         long startTime = System.currentTimeMillis();
 
         try {
@@ -159,12 +159,12 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             e.printStackTrace();
         }
 
-        logger.info("[DLLearner Plugin] Sparql Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
+        logger.info("[DLLearner] Sparql Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
 
     private void initHermitReasoner() throws Exception{
-        logger.info("[DLLearner Plugin] init Hermit Reasoner...");
+        logger.info("[DLLearner] init Hermit Reasoner...");
         long startTime = System.currentTimeMillis();
 
         Reasoner hermit = new Reasoner(project.getRootOntology());
@@ -179,7 +179,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         //reasoner.setProgressMonitor(progressMonitor);TODO integrate progress monitor
         reasoner.init();
 
-        logger.info("[DLLearner Plugin] Hermit Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
+        logger.info("[DLLearner] Hermit Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
         //reinitNecessary = false; TODO
     }
 
@@ -189,7 +189,6 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     public void initKnowledgeSource(ReasonerType reasonerType) throws Exception{
 
         // TODO
-        isActive = true;
 
         if (reasonerType.equals(ReasonerType.HERMIT_REASONER)){
             initOWLKnowledgeSoure();
@@ -200,25 +199,25 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     }
 
     private void initSparqlKnowledgeSource() throws Exception{
-        logger.info("[DLLearner Plugin] init sparql knowledge source...");
+        logger.info("[DLLearner] init sparql knowledge source...");
 
         SparqlEndpoint ep = new SparqlEndpoint(new URL(new String("http://localhost:8890/sparql")));
 
         ks = new SparqlEndpointKS(ep);//SparqlEndpoint.getEndpointDBpediaLiveAKSW());
 
-        //((SparqlEndpointKS)ks).setUseCache(false);  //  DEBUG
+        ((SparqlEndpointKS)ks).setUseCache(false);  //  DEBUG
 
         ks.init();
-        logger.info("[DLLearner Plugin] initialisation of sparql knowledge source done");
+        logger.info("[DLLearner] initialisation of sparql knowledge source done");
     }
 
     private void initOWLKnowledgeSoure() throws Exception{
-        logger.info("[DLLearner Plugin] init OWL knowledge source...");
+        logger.info("[DLLearner] init OWL knowledge source...");
 
         ks = new OWLAPIOntology(project.getRootOntology());
         ks.init();
 
-        logger.info("[DLLearner Plugin] initialisation of OWL knowledge source done");
+        logger.info("[DLLearner] initialisation of OWL knowledge source done");
     }
 
     @Override
@@ -241,7 +240,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         List<EvaluatedDescriptionClass> result;
         if (la != null) {
             result = Collections.unmodifiableList((List<EvaluatedDescriptionClass>) la
-                    .getCurrentlyBestEvaluatedDescriptions(10/*maxNrOfResults*/, 0/*0.1threshold*/, true));
+                    .getCurrentlyBestEvaluatedDescriptions(10/*maxNrOfResults*/, 0.5/*threshold*/, true));
         } else {
             result = Collections.emptyList();
         }
@@ -261,11 +260,8 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
         } catch (Error e) {
             e.printStackTrace();
-        } finally {
-            this.isActive = false;
         }
 
-        isActive = false;
     }
 
     @Override
@@ -273,10 +269,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
        return this.project.getProjectId().hashCode();
     }
 
-    @Override
-    public boolean isActive(){
-        return this.isActive;
-    }
+
 
 
 }

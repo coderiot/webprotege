@@ -6,13 +6,16 @@ import java.util.Date;
 /**
  * Created by lars on 04.06.15.
  */
-public class Suggestion implements Serializable {
+public class ServerReply implements Serializable {
 
 
     private static final long serialVersionUID = -2974784212373773166L;
     private String data;
     private String username;
     private Date time;
+    private String accuracy;
+
+    private Exception exception;
 
     public String getData() {
         return data;
@@ -30,6 +33,14 @@ public class Suggestion implements Serializable {
         this.username = username;
     }
 
+    public void setAccuracy(String accuracy){
+        this.accuracy = accuracy;
+    }
+
+    public String getAccuracy(){
+        return this.accuracy;
+    }
+
     public Date getTime() {
         return time;
     }
@@ -37,6 +48,14 @@ public class Suggestion implements Serializable {
     public void setTime(Date time) {
         this.time = time;
     }
+
+    public void setException(Exception exception){
+        this.exception = exception;
+    };
+
+    public Exception getException(){
+        return this.exception;
+    };
 
     @Override
     public String toString(){

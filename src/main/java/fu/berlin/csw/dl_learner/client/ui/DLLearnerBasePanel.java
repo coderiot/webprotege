@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.gwtext.client.widgets.layout.FitLayout;
-import edu.stanford.bmir.protege.web.client.ui.portlet.AbstractOWLEntityPortlet;
 import edu.stanford.bmir.protege.web.shared.event.HasEventHandlerManagement;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
 
@@ -25,7 +24,7 @@ public class DLLearnerBasePanel extends Composite {
 
     DLLearnerPortlet wrapperPortlet;
 
-    SuggestionPresenter presenter;
+    SuggestionsPresenter presenter;
 
     @UiTemplate("DLLearnerBasePanel.ui.xml")
     interface MyUiBinder extends UiBinder<Widget, DLLearnerBasePanel> {
@@ -51,7 +50,7 @@ public class DLLearnerBasePanel extends Composite {
 
     }
 
-    public void setPresenter(SuggestionPresenter presenter){
+    public void setPresenter(SuggestionsPresenter presenter){
         this.presenter = presenter;
     }
 

@@ -13,17 +13,17 @@ import javax.inject.Inject;
 /**
  * Created by pierre on 09.04.15.
  */
-public class GetSuggestionsExecutor {
+public class InitLearningProcessExecutor {
 
     private DispatchServiceManager dispatchServiceManager;
 
 
     @Inject
-    public GetSuggestionsExecutor(DispatchServiceManager dispatchServiceManager) {
+    public InitLearningProcessExecutor(DispatchServiceManager dispatchServiceManager) {
         this.dispatchServiceManager = dispatchServiceManager;
     }
 
-    public void execute(ProjectId projectId, OWLEntity selectedEntity, DispatchServiceCallback<GetSuggestionsResult> callback) {
-        dispatchServiceManager.execute(new GetSuggestionsAction(projectId , selectedEntity), callback);
+    public void execute(ProjectId projectId, OWLEntity selectedEntity, DispatchServiceCallback<InitLearningProcessResult> callback) {
+        dispatchServiceManager.execute(new InitLearningProcessAction(projectId , selectedEntity), callback);
     }
 }

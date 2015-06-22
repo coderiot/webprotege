@@ -1,12 +1,11 @@
 package fu.berlin.csw.dl_learner.client.ui;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.cellview.client.*;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import fu.berlin.csw.dl_learner.shared.Suggestion;
+import fu.berlin.csw.dl_learner.shared.ServerReply;
 
 import java.util.Comparator;
 import java.util.List;
@@ -14,34 +13,35 @@ import java.util.List;
 /**
  * Created by lars on 09.06.15.
  */
-public class SuggestionsListView extends CellTable<Suggestion> {
+public class SuggestionsListView extends CellTable<ServerReply> {
 
-    private List<Suggestion> list;
+    private List<ServerReply> list;
 
     public SuggestionsListView(){
 
+
         this.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
 
-        TextColumn<Suggestion> nameColumn = new TextColumn<Suggestion>() {
+        TextColumn<ServerReply> nameColumn = new TextColumn<ServerReply>() {
             @Override
-            public String getValue(Suggestion suggestion) {
+            public String getValue(ServerReply suggestion) {
                 return suggestion.getData();
             }
         };
 
-        TextColumn<Suggestion> accuracyColumn = new TextColumn<Suggestion>(){
+        TextColumn<ServerReply> accuracyColumn = new TextColumn<ServerReply>(){
             @Override
-            public String getValue(Suggestion suggestion) {
-                return suggestion.getUsername();
+            public String getValue(ServerReply suggestion) {
+                return suggestion.getAccuracy();
             }
         };
 
         // Add a selection model to handle user selection.
-        final SingleSelectionModel<Suggestion> selectionModel = new SingleSelectionModel<Suggestion>();
+        final SingleSelectionModel<ServerReply> selectionModel = new SingleSelectionModel<ServerReply>();
         this.setSelectionModel(selectionModel);
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
-                Suggestion selected = selectionModel.getSelectedObject();
+                ServerReply selected = selectionModel.getSelectedObject();
                 if (selected != null) {
                     //Window.alert("You selected: " + selected.getData());
                 }
@@ -60,56 +60,23 @@ public class SuggestionsListView extends CellTable<Suggestion> {
 
 
 
-        Suggestion sugg = new Suggestion();
-        sugg.setData("JHallo");
-        sugg.setUsername("Peter");
 
-        Suggestion sugg2 = new Suggestion();
-        sugg2.setData("CHallo");
-        sugg2.setUsername("Klaus");
-
-        Suggestion sugg3 = new Suggestion();
-        sugg3.setData("BHallo");
-        sugg3.setUsername("Karl");
-
-        Suggestion sugg4 = new Suggestion();
-        sugg4.setData("FHallo");
-        sugg4.setUsername("Oli");
-
-        Suggestion sugg5 = new Suggestion();
-        sugg5.setData("DHallo");
-        sugg5.setUsername("Kevin");
-
-        Suggestion sugg6 = new Suggestion();
-        sugg6.setData("AHallo");
-        sugg6.setUsername("Pascal");
-
-
-
-        ListDataProvider<Suggestion> dataProvider = new ListDataProvider<Suggestion>();
+        ListDataProvider<ServerReply> dataProvider = new ListDataProvider<ServerReply>();
 
         dataProvider.addDataDisplay(this);
         list = dataProvider.getList();
 
-        /*
-        list.add(sugg);
-        list.add(sugg2);
-        list.add(sugg3);
-        list.add(sugg4);
-        list.add(sugg5);
-        list.add(sugg6);
-        */
 
 
-        for(Suggestion i : list){
+        for(ServerReply i : list){
             GWT.log(i.getData());
         }
 
-        ColumnSortEvent.ListHandler<Suggestion> columnSortHandler = new ColumnSortEvent.ListHandler<Suggestion>(
+        ColumnSortEvent.ListHandler<ServerReply> columnSortHandler = new ColumnSortEvent.ListHandler<ServerReply>(
                 list);
         columnSortHandler.setComparator(nameColumn,
-                new Comparator<Suggestion>() {
-                    public int compare(Suggestion o1, Suggestion o2) {
+                new Comparator<ServerReply>() {
+                    public int compare(ServerReply o1, ServerReply o2) {
                         if (o1 == o2) {
                             return 0;
                         }
@@ -124,15 +91,15 @@ public class SuggestionsListView extends CellTable<Suggestion> {
         this.addColumnSortHandler(columnSortHandler);
 
         columnSortHandler.setComparator(accuracyColumn,
-                new Comparator<Suggestion>() {
-                    public int compare(Suggestion o1, Suggestion o2) {
+                new Comparator<ServerReply>() {
+                    public int compare(ServerReply o1, ServerReply o2) {
                         if (o1 == o2) {
                             return 0;
                         }
 
                         // Compare the name columns.
                         if (o1 != null) {
-                            return (o2 != null) ? o1.getUsername().compareTo(o2.getUsername()) : 1;
+                            return (o2 != null) ? o1.getAccuracy().compareTo(o2.getAccuracy()) : 1;
                         }
                         return -1;
                     }
@@ -142,7 +109,7 @@ public class SuggestionsListView extends CellTable<Suggestion> {
 
     }
 
-    public void addSuggestion(Suggestion suggestion){
+    public void addSuggestion(ServerReply suggestion){
         this.list.add(suggestion);
     }
 

@@ -1,22 +1,12 @@
 package fu.berlin.csw.dl_learner.client.ui;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import edu.stanford.bmir.protege.web.client.Application;
-import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceCallback;
-import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceManager;
 import edu.stanford.bmir.protege.web.client.project.Project;
 import edu.stanford.bmir.protege.web.client.ui.library.msgbox.MessageBox;
 import edu.stanford.bmir.protege.web.client.ui.portlet.AbstractOWLEntityPortlet;
-import edu.stanford.bmir.protege.web.client.ui.util.UIUtil;
-import edu.stanford.bmir.protege.web.server.app.App;
-import edu.stanford.bmir.protege.web.shared.project.ProjectId;
 import fu.berlin.csw.dl_learner.client.websocket.WebSocket;
 import fu.berlin.csw.dl_learner.client.websocket.exception.WebSocketNotSupportedException;
-import fu.berlin.csw.dl_learner.shared.GetSuggestionsExecutor;
-import fu.berlin.csw.dl_learner.shared.GetSuggestionsResult;
-import fu.berlin.csw.dl_learner.shared.Suggestion;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
 
 import java.util.logging.Logger;
@@ -29,7 +19,7 @@ import java.util.logging.Logger;
 public class DLLearnerPortlet extends AbstractOWLEntityPortlet {
 
 
-    private SuggestionPresenter presenter;
+    private SuggestionsPresenter presenter;
     private DLLearnerBasePanel basePanel;
     static Logger logger = Logger.getLogger(DLLearnerPortlet.class.getName());
 
@@ -41,10 +31,6 @@ public class DLLearnerPortlet extends AbstractOWLEntityPortlet {
     @Override
     public void initialize() {
 
-        GWT.log("Hier ist der Logger!!! ");
-
-        //OWLClassExpression ex = new OWLClassExpression();
-
 
 
         basePanel = new DLLearnerBasePanel(getProjectId(), this, this);
@@ -53,51 +39,29 @@ public class DLLearnerPortlet extends AbstractOWLEntityPortlet {
         add(basePanel);
 
 
-        /*
-        GetSuggestionsExecutor cex = new GetSuggestionsExecutor(DispatchServiceManager.get());
-        Application app = Application.get();
-
-        cex.execute(app.getActiveProject().get(), null, new DispatchServiceCallback<GetSuggestionsResult>() {
-            @Override
-            public void handleSuccess(GetSuggestionsResult result) {
-
-                MessageBox.showMessage("WebServer started.");//,result.getMessage());
-                GWT.log("WebServer started");
-
-            }
-
-            @Override
-            public void handleExecutionException(Throwable cause) {
-                MessageBox.showAlert("Server Error!",
-                        cause.getMessage());
-                UIUtil.hideLoadProgessBar();
-                cause.printStackTrace();
-            }
-        });
-        */
-
     }
 
 
 
-        public SuggestionPresenter startWebSocket(){
+        public SuggestionsPresenter startWebSocket(){
 
 
-            GWT.log( "ws://" + Window.Location.getHostName() + ":8025/" +  "chat/" + getProjectId().getId());
+            GWT.log( "ws://" + Window.Location.getHostName() + ":8025/" +  "suggestions/" + getProjectId().getId());
 
 
-            String url = "ws://" + Window.Location.getHostName() + ":8025/" +  "chat/" + getProjectId().getId();
+            String url = "ws://" + Window.Location.getHostName() + ":8025/" +  "suggestions/" + getProjectId().getId();
             final WebSocket webSocket = new WebSocket(url);
 
 
 
-            presenter = new SuggestionPresenter(webSocket);
+            presenter = new SuggestionsPresenter(webSocket);
 
 
             try {
                 webSocket.open();
             } catch (WebSocketNotSupportedException e) {
-                Window.alert("Sorry your browser dosen't support Web Socket");
+                MessageBox.showErrorMessage("Couldn't start WebSocket on Client", e);
+                GWT.log("Couldn't start WebSocket on Client!", e);
             }
 
 

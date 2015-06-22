@@ -10,7 +10,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by pierre on 09.04.15.
  */
-public class GetSuggestionsAction extends AbstractHasProjectAction<GetSuggestionsResult> {
+public class InitLearningProcessAction extends AbstractHasProjectAction<InitLearningProcessResult> {
 
 
     private OWLEntity selectedEntity;
@@ -18,10 +18,10 @@ public class GetSuggestionsAction extends AbstractHasProjectAction<GetSuggestion
     /**
      * For Serialization purposes only
      */
-    private GetSuggestionsAction() {
+    private InitLearningProcessAction() {
     }
 
-    public GetSuggestionsAction(ProjectId projectId, OWLEntity selectedEntity) {
+    public InitLearningProcessAction(ProjectId projectId, OWLEntity selectedEntity) {
         super(projectId);
         this.selectedEntity = selectedEntity;
     }

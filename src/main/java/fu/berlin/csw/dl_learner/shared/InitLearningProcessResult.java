@@ -12,17 +12,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Created by pierre on 09.04.15.
  */
-public class GetSuggestionsResult implements Result {
+public class InitLearningProcessResult implements Result {
     private String message;
     //private PaginationData<EvaluatedDescriptionClass> paginationData;
 
     /**
      * For serialization only
      */
-    private GetSuggestionsResult() {
+    private InitLearningProcessResult() {
     }
 
-    public GetSuggestionsResult(String message){//, PaginationData<EvaluatedDescriptionClass> paginationData) {
+    public InitLearningProcessResult(String message){//, PaginationData<EvaluatedDescriptionClass> paginationData) {
         //this.paginationData = paginationData;
         this.message = message;
     }

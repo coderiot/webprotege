@@ -1,25 +1,28 @@
 package fu.berlin.csw.dl_learner.client.ui;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.gwtext.client.core.EventObject;
 import com.gwtext.client.widgets.Button;
 import com.gwtext.client.widgets.Toolbar;
+import com.gwtext.client.widgets.Window;
 import com.gwtext.client.widgets.event.ButtonListenerAdapter;
 import edu.stanford.bmir.protege.web.client.Application;
 import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceCallback;
 import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceManager;
-import edu.stanford.bmir.protege.web.client.ui.library.msgbox.MessageBox;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
-import fu.berlin.csw.dl_learner.shared.GetSuggestionsExecutor;
-import fu.berlin.csw.dl_learner.shared.GetSuggestionsResult;
+import fu.berlin.csw.dl_learner.shared.InitLearningProcessExecutor;
+import fu.berlin.csw.dl_learner.shared.InitLearningProcessResult;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
 
 
 /**
  * Created by lars on 09.06.15.
  */
-public class SuggestionsWindow extends com.gwtext.client.widgets.Window {
+public class SuggestionsWindow extends Window {
 
     private DLLearnerPortlet wrapperPortlet;
     private Button findEqualClassesButton;
@@ -32,7 +35,7 @@ public class SuggestionsWindow extends com.gwtext.client.widgets.Window {
         this.wrapperPortlet = wrapperPortlet;
         setTitle("Find equivalent Classes:");
         setWidth(500);
-        setHeight(365);
+        setHeight(600);
         //setLayout(new FitLayout());
 
         this.addSuggestionsButton();
@@ -41,7 +44,10 @@ public class SuggestionsWindow extends com.gwtext.client.widgets.Window {
 
         suggestionsListView = new SuggestionsListView();
 
-        this.add(suggestionsListView);
+        ScrollPanel scrollPanel = new ScrollPanel();
+        scrollPanel.add(suggestionsListView);
+
+        this.add(scrollPanel);
 
     }
 
@@ -56,55 +62,26 @@ public class SuggestionsWindow extends com.gwtext.client.widgets.Window {
         findEqualClassesButton.addListener(new ButtonListenerAdapter() {
             @Override
             public void onClick(Button button, EventObject e) {
-                GetSuggestionsExecutor cex = new GetSuggestionsExecutor(DispatchServiceManager.get());
+                InitLearningProcessExecutor cex = new InitLearningProcessExecutor(DispatchServiceManager.get());
                 final ProjectId projectId = Application.get().getActiveProject().get();
 
                 Application app = Application.get();
-
-                // Send Suggestion request to websocket in order to stream the suggestions gradually
-
-
-                final Timer timer = new Timer() {
-                    @Override
-                    public void run()
-                    {
-                        final SuggestionPresenter presenter = wrapperPortlet.startWebSocket();
-                        presenter.setListView(getSuggestionsListView());
-
-                        final Timer timer2 = new Timer(){
-                            @Override
-                            public void run()
-                            {
-                                final SuggestionRequest req = new SuggestionRequest();
-                                req.setData("Suggestion Request");
-                                req.setProjectId(projectId);
-
-                                presenter.sendMessage(req);
-                            }
-                        };
-
-                        timer2.schedule(5000);
-
-                    }
-                };
-
 
 
                 // invoke GetSuggestionAction and start learning process on the server
 
                 // TODO: No entity selected!!
-                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), new DispatchServiceCallback<GetSuggestionsResult>() {
+                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), new DispatchServiceCallback<InitLearningProcessResult>() {
+
                     @Override
-                    public void handleSuccess(GetSuggestionsResult result) {
-                        MessageBox.showMessage("Class learning success!",
+                    public void handleSuccess(InitLearningProcessResult result) {
+                        GWT.log("Initialisation Process complete!: " +
                                 result.getMessage());
 
                         /*  TODO:  final possible?? */
 
-                        /*final SuggestionPresenter presenter = wrapperPortlet.startWebSocket();
+                        final SuggestionsPresenter presenter = wrapperPortlet.startWebSocket();
                         presenter.setListView(getSuggestionsListView());
-
-
 
                         final SuggestionRequest req = new SuggestionRequest();
                         req.setData("Suggestion Request");
@@ -120,21 +97,30 @@ public class SuggestionsWindow extends com.gwtext.client.widgets.Window {
                             }
                         };
 
-                        timer.schedule(5000);*/
+                        timer.schedule(5000);
 
 
                     }
 
                     @Override
                     public void handleExecutionException(Throwable cause) {
-                        MessageBox.showAlert("Server Error!",
-                                cause.getMessage());
-                        cause.printStackTrace();
+                        showDefaultCursor();
+
+                        GWT.log("Server Exception during initialisation of learning process!", cause);
+
+                        if(cause.getMessage() == null){
+                            com.google.gwt.user.client.Window.alert("Server Exception during initialisation of learning process! See GWT log for details!" +
+                                    "\n" + cause.toString());
+                        } else {
+                            com.google.gwt.user.client.Window.alert("Server Exception during initialisation of learning process! See GWT log for details!" +
+                                    "\n" + cause.getMessage());
+                        }
+
+                        //MessageBox.showErrorMessage("Server Exception during initialisation of learning process!",
+                        //        cause);
                     }
                 });
-
-
-                timer.schedule(5000);
+                showWaitCursor();
 
 
 
@@ -201,6 +187,16 @@ public class SuggestionsWindow extends com.gwtext.client.widgets.Window {
 
     public SuggestionsListView getSuggestionsListView(){
         return this.suggestionsListView;
+    }
+
+
+
+    public static void showWaitCursor() {
+        DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "wait");
+    }
+
+    public static void showDefaultCursor() {
+        DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "default");
     }
 
 

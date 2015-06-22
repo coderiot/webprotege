@@ -13,11 +13,10 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamFactory;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
-import edu.stanford.bmir.protege.web.shared.project.ProjectId;
 import fu.berlin.csw.dl_learner.client.websocket.exception.WebSocketNotSupportedException;
 import fu.berlin.csw.dl_learner.client.websocket.service.SuggestionRequestService;
 import fu.berlin.csw.dl_learner.client.websocket.service.SuggestionService;
-import fu.berlin.csw.dl_learner.shared.Suggestion;
+import fu.berlin.csw.dl_learner.shared.ServerReply;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
 
 
@@ -101,7 +100,7 @@ public class WebSocket {
         try {
             final SerializationStreamReader streamReader = suggestionFactory
                     .createStreamReader(msg);
-            final Suggestion suggestion = (Suggestion) streamReader.readObject();
+            final ServerReply suggestion = (ServerReply) streamReader.readObject();
             for (WebSocketHandler handler : handlers) {
                 handler.onMessage(suggestion);
             }
