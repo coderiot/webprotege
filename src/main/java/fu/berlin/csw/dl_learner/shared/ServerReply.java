@@ -15,7 +15,7 @@ public class ServerReply implements Serializable {
     private Date time;
     private String accuracy;
 
-    private Exception exception;
+    private Throwable throwable;
 
     public String getData() {
         return data;
@@ -49,12 +49,12 @@ public class ServerReply implements Serializable {
         this.time = time;
     }
 
-    public void setException(Exception exception){
-        this.exception = exception;
+    public void setThrowable(Throwable throwable){
+        this.throwable = throwable;
     };
 
-    public Exception getException(){
-        return this.exception;
+    public Throwable getThrowable(){
+        return this.throwable;
     };
 
     @Override

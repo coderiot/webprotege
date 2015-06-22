@@ -53,15 +53,15 @@ public class SuggestionsPresenter implements WebSocketHandler {
             // Handle Server Error
 
             SuggestionsWindow.showDefaultCursor();
-            GWT.log("[DLLearner] Server Exception during learning process!", reply.getException());
+            GWT.log("[DLLearner] Server Exception during learning process!", reply.getThrowable());
             webSocket.close();
 
-            if(reply.getException().getMessage()== null){
+            if(reply.getThrowable().getMessage()== null){
                 com.google.gwt.user.client.Window.alert("Server Exception during learning process! See GWT log for details!" +
-                        "\n" + reply.getException().toString());
+                        "\n" + reply.getThrowable().toString());
             } else {
                 com.google.gwt.user.client.Window.alert("Server Exception during learning process! See GWT log for details!" +
-                        "\n" + reply.getException().getMessage());
+                        "\n" + reply.getThrowable().getMessage());
             }
 
         } else {

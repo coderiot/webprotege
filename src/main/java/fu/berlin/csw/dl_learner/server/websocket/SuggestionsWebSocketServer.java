@@ -91,7 +91,7 @@ public class SuggestionsWebSocketServer {
                     }
                 }
 
-            }, 10, 500);
+            }, 100, 500);
 
 
             Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).startLearning();
@@ -115,14 +115,27 @@ public class SuggestionsWebSocketServer {
         } catch (Exception e ) {
 
 
+            logger.log(Level.SEVERE, "[DLLearner] Exception on web socket server", e);
+            timer.cancel();
+
+            ServerReply suggestion = new ServerReply();
+            suggestion.setData("Error");
+            suggestion.setUsername("Lars");
+            suggestion.setThrowable(e);
+            sendSuggestion(suggestion, session);
+
+        } catch (Error e){
+
             logger.log(Level.SEVERE, "[DLLearner] Error on web socket server", e);
             timer.cancel();
 
             ServerReply suggestion = new ServerReply();
             suggestion.setData("Error");
             suggestion.setUsername("Lars");
-            suggestion.setException(e);
+            suggestion.setThrowable(e);
             sendSuggestion(suggestion, session);
+
+           // Todo
 
         }
 

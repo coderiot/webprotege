@@ -92,12 +92,12 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             RhoDRDown op = new RhoDRDown();
             op.setReasoner(reasoner);
             op.setUseNegation(false);//useNegation);
-            op.setUseAllConstructor(false);//useAllConstructor);
-            op.setUseCardinalityRestrictions(false);//useCardinalityRestrictions);
+            op.setUseAllConstructor(true);//useAllConstructor);
+            op.setUseCardinalityRestrictions(true);//useCardinalityRestrictions);
             //if(useCardinalityRestrictions){
             op.setCardinalityLimit(5);//cardinalityLimit);
             //}
-            op.setUseExistsConstructor(false);//useExistsConstructor);
+            op.setUseExistsConstructor(true);//useExistsConstructor);
             op.setUseHasValueConstructor(false);//useHasValueConstructor);
             op.init();
 
@@ -252,15 +252,13 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
         logger.info("[DLLearner] started learning of " +
                 axiomType.getName() + " axioms");
-        try {
-            la.start();
 
-            logger.info("[DLLearner] finished learning of " +
-                    axiomType.getName() + " axioms");
+        la.start();
 
-        } catch (Error e) {
-            e.printStackTrace();
-        }
+        logger.info("[DLLearner] finished learning of " +
+                axiomType.getName() + " axioms");
+
+
 
     }
 
