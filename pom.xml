@@ -270,20 +270,13 @@
 
         <!-- TODO: no local systemPath -->
 
-        <!--<dependency>
-            <groupId>org.dllearner</groupId>
-            <artifactId>components-core</artifactId>
-            <version>1.1-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>/home/lars/dl-learner-repo/DL-Learner/components-core/target/components-core-1.1-SNAPSHOT.jar</systemPath>
-        </dependency> -->
 
         <dependency>
             <groupId>org.dllearner</groupId>
             <artifactId>components-core</artifactId>
             <version>1.1-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>/home/lars/dl-learner-repo/DL-Learner/components-core/target/components-core-1.1-SNAPSHOT.jar</systemPath>
+            <!--<scope>system</scope>-->
+            <!--<systemPath>/home/lars/dl-learner-repo/DL-Learner/components-core/target/components-core-1.1-SNAPSHOT.jar</systemPath>-->
         </dependency>
 
         <!--<dependency>
