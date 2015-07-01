@@ -4,10 +4,18 @@ package fu.berlin.csw.dl_learner.server;
  * Created by lars on 29.04.15.
  */
 
+import com.clarkparsia.owlapiv3.OWL;
+import edu.stanford.bmir.protege.web.server.change.ChangeGenerationContext;
+import edu.stanford.bmir.protege.web.server.change.ChangeListGenerator;
+import edu.stanford.bmir.protege.web.server.change.FixedMessageChangeDescriptionGenerator;
+import edu.stanford.bmir.protege.web.server.change.OntologyChangeList;
 import edu.stanford.bmir.protege.web.server.inject.WebProtegeInjector;
 import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
+import edu.stanford.bmir.protege.web.server.owlapi.OWLOntologyChangeFactory;
+import edu.stanford.bmir.protege.web.server.owlapi.RenameMap;
 import edu.stanford.bmir.protege.web.server.owlapi.change.OWLAPIChangeManager;
+import edu.stanford.bmir.protege.web.shared.axiom.OWLAxiomData;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.core.AbstractReasonerComponent;
 import org.dllearner.core.KnowledgeSource;
@@ -21,9 +29,8 @@ import org.dllearner.reasoning.OWLAPIReasoner;
 import org.dllearner.reasoning.SPARQLReasoner;
 import org.dllearner.refinementoperators.RhoDRDown;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.change.OWLOntologyChangeData;
+import org.semanticweb.owlapi.model.*;
 
 
 import java.net.URL;
@@ -266,7 +273,6 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     public int hashCode(){
        return this.project.getProjectId().hashCode();
     }
-
 
 
 

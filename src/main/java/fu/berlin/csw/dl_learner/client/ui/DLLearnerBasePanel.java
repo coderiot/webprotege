@@ -13,6 +13,8 @@ import com.gwtext.client.widgets.layout.FitLayout;
 import edu.stanford.bmir.protege.web.shared.event.HasEventHandlerManagement;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
 
+import java.awt.*;
+
 /**
  * Created by lars on 13.05.15.
  */
@@ -39,6 +41,9 @@ public class DLLearnerBasePanel extends Composite {
 
     public DLLearnerBasePanel(final ProjectId projectId,
                            HasEventHandlerManagement eventHandlerMan, DLLearnerPortlet wrapperPortlet) {
+
+
+
 
         this.projectId = projectId;
 

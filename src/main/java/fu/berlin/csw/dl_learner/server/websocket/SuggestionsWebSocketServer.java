@@ -63,7 +63,7 @@ public class SuggestionsWebSocketServer {
                 boolean learningHasStarted = false;
 
                 @Override
-                public void run() {
+                synchronized public void run() {
                     //setProgress(progress);
 
 
@@ -91,12 +91,12 @@ public class SuggestionsWebSocketServer {
                     }
                 }
 
-            }, 100, 500);
+            }, 10, 50);
 
 
             Manager.getInstance().getProjectRelatedLearner(request.getProjectId()).startLearning();
 
-            // Wait 500ms to make sure that all solutions have already been send to the client
+            // Wait 50ms to make sure that all solutions have already been send to the client
 
             Timer timer2 = new Timer();
 
@@ -109,7 +109,7 @@ public class SuggestionsWebSocketServer {
                     suggestion.setUsername("Lars");
                     sendSuggestion(suggestion, session);
                 }
-            }, 500);
+            }, 50);
 
 
         } catch (Exception e ) {

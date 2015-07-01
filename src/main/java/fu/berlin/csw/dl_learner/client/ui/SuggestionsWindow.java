@@ -1,5 +1,7 @@
 package fu.berlin.csw.dl_learner.client.ui;
 
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
@@ -17,6 +19,7 @@ import edu.stanford.bmir.protege.web.shared.project.ProjectId;
 import fu.berlin.csw.dl_learner.shared.InitLearningProcessExecutor;
 import fu.berlin.csw.dl_learner.shared.InitLearningProcessResult;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
+import com.google.gwt.canvas.client.Canvas;
 
 
 /**
@@ -28,7 +31,13 @@ public class SuggestionsWindow extends Window {
     private Button findEqualClassesButton;
     private Button addSuggestionButton;
     private Button cancelButton;
+    private Button showCoverageButton;
     private SuggestionsListView suggestionsListView;
+
+
+    final CssColor colorRed = CssColor.make("red");
+    final CssColor colorGreen = CssColor.make("green");
+    final CssColor colorBlue = CssColor.make("blue");
 
 
     public SuggestionsWindow(DLLearnerPortlet wrapperPortlet){
@@ -41,6 +50,7 @@ public class SuggestionsWindow extends Window {
         this.addSuggestionsButton();
         this.addAddSuggestionButton();
         this.addCancelButton();
+        this.addShowCoverageButton();
 
         suggestionsListView = new SuggestionsListView();
 
@@ -184,6 +194,57 @@ public class SuggestionsWindow extends Window {
 
         cancelButton.setWidth("33%");
     }
+
+
+    private void addShowCoverageButton(){
+        showCoverageButton = new Button();
+        showCoverageButton.setText("Cancel Process");
+
+
+        showCoverageButton.addListener(new ButtonListenerAdapter() {
+            @Override
+            public void onClick(Button button, EventObject e) {
+
+
+                Window window = new Window();
+
+                Canvas canvas = Canvas.createIfSupported();
+                Context2d context;
+
+                canvas.setWidth("300px");
+                canvas.setHeight("300px");
+                canvas.setCoordinateSpaceWidth(300);
+                canvas.setCoordinateSpaceHeight(300);
+
+                window.add(canvas);
+
+                context = canvas.getContext2d();
+
+                context.beginPath();
+                context.setFillStyle(colorRed);
+                context.fillRect(100, 50, 100, 100);
+                context.setFillStyle(colorGreen);
+                context.fillRect(200, 150, 100, 100);
+                context.setFillStyle(colorBlue);
+                context.fillRect(300, 250, 100, 100);
+                context.closePath();
+
+                window.show();
+            }
+
+        });
+
+        setTopToolbar(new Toolbar());
+        Toolbar toolbar = getTopToolbar();
+
+        toolbar.addElement(showCoverageButton.getElement());
+
+        showCoverageButton.setWidth("33%");
+    }
+
+
+
+
 
     public SuggestionsListView getSuggestionsListView(){
         return this.suggestionsListView;
