@@ -31,6 +31,8 @@ import org.dllearner.refinementoperators.RhoDRDown;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.change.OWLOntologyChangeData;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 
 import java.net.URL;
@@ -133,6 +135,8 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             initHermitReasoner();
         } else if(reasonerType.equals(ReasonerType.SPARQL_REASONER)){
             initSparqlReasoner();
+        } else if(reasonerType.equals((ReasonerType.PELLET_REASONER))){
+            initPelletReasoner();
         }
 
     }
@@ -191,6 +195,30 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     }
 
 
+    private void initPelletReasoner() throws Exception{
+        logger.info("[DLLearner] init Pellet Reasoner...");
+        long startTime = System.currentTimeMillis();
+
+        OWLReasonerFactory pelletFactory = com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory.getInstance();
+
+        OWLReasoner pellet = pelletFactory.createReasoner(project.getRootOntology());
+
+        OWLAPIReasoner baseReasoner = new OWLAPIReasoner(pellet);
+
+        baseReasoner.init();
+
+        // closed world reasoner
+        reasoner = new ClosedWorldReasoner(Collections.singleton(ks));
+        ((ClosedWorldReasoner)reasoner).setReasonerComponent(baseReasoner);
+
+        //reasoner.setProgressMonitor(progressMonitor);TODO integrate progress monitor
+        reasoner.init();
+
+        logger.info("[DLLearner] Hermit Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
+
+    }
+
+
 
     @Override
     public void initKnowledgeSource(ReasonerType reasonerType) throws Exception{
@@ -226,6 +254,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
         logger.info("[DLLearner] initialisation of OWL knowledge source done");
     }
+
 
     @Override
     public synchronized void setAxiomType(AxiomType axiomType) {

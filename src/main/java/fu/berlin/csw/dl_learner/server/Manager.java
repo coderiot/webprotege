@@ -72,7 +72,7 @@ public class Manager {
             classDescriptionLearner.setAxiomType(AxiomType.EQUIVALENT_CLASSES);            // TODO: generic solution
             classDescriptionLearner.setEntity(selectedEntity);
             classDescriptionLearner.initKnowledgeSource(ReasonerType.HERMIT_REASONER);     // TODO: generic solution
-            classDescriptionLearner.initReasoner(ReasonerType.HERMIT_REASONER);
+            classDescriptionLearner.initReasoner(ReasonerType.PELLET_REASONER);
             classDescriptionLearner.initLearningProblem();
             classDescriptionLearner.initLearningAlgorithm();
 

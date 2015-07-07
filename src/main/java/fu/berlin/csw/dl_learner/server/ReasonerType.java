@@ -9,6 +9,10 @@ public enum ReasonerType {
     SPARQL_REASONER,
 
     /* Hermit Reasoner can be used with the local OWL Ontology */
-    HERMIT_REASONER
+    HERMIT_REASONER,
+
+
+    /* Pellet Reasoner can be used with the local OWL Ontology */
+    PELLET_REASONER
 
 }
