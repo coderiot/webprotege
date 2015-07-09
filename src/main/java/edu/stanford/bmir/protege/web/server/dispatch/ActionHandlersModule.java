@@ -46,6 +46,8 @@ import edu.stanford.bmir.protege.web.server.watches.AddWatchActionHandler;
 import edu.stanford.bmir.protege.web.server.watches.RemoveWatchActionHandler;
 import edu.stanford.bmir.protege.web.shared.project.SetUIConfigurationActionHandler;
 import edu.stanford.bmir.protege.web.server.revision.*;
+import fu.berlin.csw.dl_learner.server.InitLearningProcessActionHandler;
+
 /**
  * Matthew Horridge
  * Stanford Center for Biomedical Informatics Research
@@ -166,5 +168,8 @@ public class ActionHandlersModule extends AbstractModule {
 
         multibinder.addBinding().to(GetProjectChangesActionHandler.class);
         multibinder.addBinding().to(GetWatchedEntityChangesActionHandler.class);
+
+        multibinder.addBinding().to(InitLearningProcessActionHandler.class);
+
     }
 }
