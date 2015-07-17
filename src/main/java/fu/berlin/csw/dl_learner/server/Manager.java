@@ -49,7 +49,7 @@ public class Manager {
     }
 
 
-    public void initLearnProcess(OWLAPIProject project, OWLEntity selectedEntity) {
+    public void initLearnProcess(OWLAPIProject project, OWLEntity selectedEntity, boolean useSparqlEndpoint, String sparqlEndpoint) {
 
         ClassDescriptionLearner classDescriptionLearner = null;
 
@@ -71,13 +71,18 @@ public class Manager {
 
             classDescriptionLearner.setAxiomType(AxiomType.EQUIVALENT_CLASSES);            // TODO: generic solution
             classDescriptionLearner.setEntity(selectedEntity);
-            classDescriptionLearner.initKnowledgeSource(ReasonerType.HERMIT_REASONER);     // TODO: generic solution
-            classDescriptionLearner.initReasoner(ReasonerType.PELLET_REASONER);
+
+            if (useSparqlEndpoint){
+                classDescriptionLearner.initKnowledgeSource(ReasonerType.SPARQL_REASONER, sparqlEndpoint);     // TODO: generic solution
+                classDescriptionLearner.initReasoner(ReasonerType.SPARQL_REASONER);
+            } else {
+                classDescriptionLearner.initKnowledgeSource(ReasonerType.HERMIT_REASONER, null);     // TODO: generic solution
+                classDescriptionLearner.initReasoner(ReasonerType.PELLET_REASONER);
+            }
             classDescriptionLearner.initLearningProblem();
             classDescriptionLearner.initLearningAlgorithm();
 
             logger.info("[DLLearner Plugin] Initialisation of learning process finished.");
-
             logger.info("[DLLearner Plugin] Start learning.");
 
 

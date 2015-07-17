@@ -3,10 +3,12 @@ package fu.berlin.csw.dl_learner.client.ui;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.*;
 import com.gwtext.client.core.EventObject;
 import com.gwtext.client.widgets.Button;
 import com.gwtext.client.widgets.Toolbar;
@@ -20,6 +22,7 @@ import fu.berlin.csw.dl_learner.shared.InitLearningProcessExecutor;
 import fu.berlin.csw.dl_learner.shared.InitLearningProcessResult;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.user.cellview.client.SimplePager;
 
 
 /**
@@ -34,6 +37,9 @@ public class SuggestionsWindow extends Window {
     private Button showCoverageButton;
     private SuggestionsListView suggestionsListView;
 
+    private String sparqlEndpoint;
+    private Boolean useSparqlEndpoint = false;
+
 
     final CssColor colorRed = CssColor.make("red");
     final CssColor colorGreen = CssColor.make("green");
@@ -44,20 +50,135 @@ public class SuggestionsWindow extends Window {
         this.wrapperPortlet = wrapperPortlet;
         setTitle("Find equivalent Classes:");
         setWidth(500);
-        setHeight(600);
+        setHeight(280);
         //setLayout(new FitLayout());
 
         this.addSuggestionsButton();
         this.addAddSuggestionButton();
         this.addCancelButton();
-        this.addShowCoverageButton();
+        //this.addShowCoverageButton();
+
+
+        final DockLayoutPanel sp = new DockLayoutPanel(Style.Unit.EM);
+
 
         suggestionsListView = new SuggestionsListView();
 
-        ScrollPanel scrollPanel = new ScrollPanel();
-        scrollPanel.add(suggestionsListView);
+        sp.addNorth(suggestionsListView, 16);
+        //this.add(suggestionsListView);
 
-        this.add(scrollPanel);
+
+        SimplePager pager = new SimplePager();
+        pager.setDisplay(suggestionsListView);
+        pager.setPageSize(7);
+
+
+        //this.add(pager);
+        sp.addNorth(pager, 16);
+
+
+        //hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
+        //hp.setHeight("10%");
+
+        StackPanel lp = new StackPanel();
+
+
+        Label label = new Label();
+        Label label2 = new Label();
+
+        CheckBox useSparqlCheckBox = new CheckBox();
+        TextBox useSparqlTextBox = new TextBox();
+
+        Button configButton = new Button();
+        configButton.setText("Configure Learning Algorithm");
+        configButton.setWidth("100%");
+        configButton.setHeight("100%");
+
+
+        configButton.addListener(new ButtonListenerAdapter(){
+
+            private TextBox sparqlEndpointTextBox;
+            private Window window;
+
+            public void closeWindow(){
+                this.window.close();
+            }
+
+            public void disableTextBox(){
+                sparqlEndpointTextBox.setEnabled(false);
+            }
+
+            public void enableTextBox(){
+                sparqlEndpointTextBox.setEnabled(true);
+            }
+
+            @Override
+            public void onClick(Button button, EventObject e) {
+
+                // Build Configuration Window
+
+                window = new Window();
+                window.setTitle("Configuration");
+
+                window.setHeight(100);
+                window.setWidth(300);
+
+                // Configure Use of Sparql Endpoint to receive instance data
+
+                CheckBox useSparqlCheckBox = new CheckBox();
+                useSparqlCheckBox.setText("use Sparql Reasoner ");
+
+                useSparqlCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                    @Override
+                    public void onValueChange(ValueChangeEvent<Boolean> valueChangeEvent) {
+                        if (valueChangeEvent.getValue().equals(true)){
+                            setUseSparqlEndpoint(true);
+                            enableTextBox();
+                        } else {
+                            setUseSparqlEndpoint(false);
+                            disableTextBox();
+                        }
+                    }
+                });
+
+                sparqlEndpointTextBox = new TextBox();
+                sparqlEndpointTextBox.setEnabled(false);
+                sparqlEndpointTextBox.setWidth("100%");
+
+                sparqlEndpointTextBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+                    @Override
+                    public void onValueChange(ValueChangeEvent<String> event) {
+                        setSparqlEndpoint(event.getValue());
+                    }
+                });
+
+                Button okButton = new Button();
+
+                okButton.setText("OK");
+                okButton.setWidth("100%");
+                okButton.addListener(new ButtonListenerAdapter(){
+                    @Override
+                    public void onClick(Button button, EventObject e) {
+                        closeWindow();
+                    }
+                });
+
+                window.add(useSparqlCheckBox);
+                window.add(sparqlEndpointTextBox);
+                window.add(okButton);
+
+                window.show();
+            }
+        });
+
+        sp.addSouth(configButton, 2);
+
+        sp.setHeight("100%");
+
+        this.add(sp);
+
+
+
 
     }
 
@@ -81,7 +202,7 @@ public class SuggestionsWindow extends Window {
                 // invoke GetSuggestionAction and start learning process on the server
 
                 // TODO: No entity selected!!
-                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), new DispatchServiceCallback<InitLearningProcessResult>() {
+                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), getUseSparqlEndpoint(), getSparqlEndpoint(), new DispatchServiceCallback<InitLearningProcessResult>() {
 
                     @Override
                     public void handleSuccess(InitLearningProcessResult result) {
@@ -196,55 +317,6 @@ public class SuggestionsWindow extends Window {
     }
 
 
-    private void addShowCoverageButton(){
-        showCoverageButton = new Button();
-        showCoverageButton.setText("Cancel Process");
-
-
-        showCoverageButton.addListener(new ButtonListenerAdapter() {
-            @Override
-            public void onClick(Button button, EventObject e) {
-
-
-                Window window = new Window();
-
-                Canvas canvas = Canvas.createIfSupported();
-                Context2d context;
-
-                canvas.setWidth("300px");
-                canvas.setHeight("300px");
-                canvas.setCoordinateSpaceWidth(300);
-                canvas.setCoordinateSpaceHeight(300);
-
-                window.add(canvas);
-
-                context = canvas.getContext2d();
-
-                context.beginPath();
-                context.setFillStyle(colorRed);
-                context.fillRect(100, 50, 100, 100);
-                context.setFillStyle(colorGreen);
-                context.fillRect(200, 150, 100, 100);
-                context.setFillStyle(colorBlue);
-                context.fillRect(300, 250, 100, 100);
-                context.closePath();
-
-                window.show();
-            }
-
-        });
-
-        setTopToolbar(new Toolbar());
-        Toolbar toolbar = getTopToolbar();
-
-        toolbar.addElement(showCoverageButton.getElement());
-
-        showCoverageButton.setWidth("33%");
-    }
-
-
-
-
 
     public SuggestionsListView getSuggestionsListView(){
         return this.suggestionsListView;
@@ -261,5 +333,22 @@ public class SuggestionsWindow extends Window {
     }
 
 
+
+    public void setSparqlEndpoint(String endpoint){
+        GWT.log(endpoint);
+        this.sparqlEndpoint=endpoint;
+    }
+
+    public String getSparqlEndpoint(){
+        return this.sparqlEndpoint;
+    }
+
+    public void setUseSparqlEndpoint(boolean useSparqlEndpoint){
+        this.useSparqlEndpoint = useSparqlEndpoint;
+    }
+
+    public boolean getUseSparqlEndpoint(){
+        return this.useSparqlEndpoint;
+    }
 
 }

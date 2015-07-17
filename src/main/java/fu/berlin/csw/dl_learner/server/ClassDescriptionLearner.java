@@ -21,7 +21,7 @@ public interface ClassDescriptionLearner {
 
     public void setAxiomType(AxiomType axiomType);
 
-    public void initKnowledgeSource(ReasonerType reasonerType) throws Exception;
+    public void initKnowledgeSource(ReasonerType reasonerType, String sparqlEndpoint) throws Exception;
 
     public void initReasoner(ReasonerType reasonerType) throws Exception;
 

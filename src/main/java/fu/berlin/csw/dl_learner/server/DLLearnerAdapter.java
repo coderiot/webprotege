@@ -60,9 +60,11 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     }
 
 
+    ///  kann weg
+
     @Override
     public synchronized void init(ReasonerType reasonerType) throws Exception{
-        initKnowledgeSource(reasonerType);
+        //initKnowledgeSource(reasonerType);
         //if(reinitNecessary){
         initReasoner(reasonerType);
         //}
@@ -221,22 +223,22 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
 
     @Override
-    public void initKnowledgeSource(ReasonerType reasonerType) throws Exception{
+    public void initKnowledgeSource(ReasonerType reasonerType, String sparqlEndpoint) throws Exception{
 
         // TODO
 
         if (reasonerType.equals(ReasonerType.HERMIT_REASONER)){
             initOWLKnowledgeSoure();
         } else if(reasonerType.equals(ReasonerType.SPARQL_REASONER)){
-            initSparqlKnowledgeSource();
+            initSparqlKnowledgeSource(sparqlEndpoint);
         }
 
     }
 
-    private void initSparqlKnowledgeSource() throws Exception{
+    private void initSparqlKnowledgeSource(String sparqlEndpoint) throws Exception{
         logger.info("[DLLearner] init sparql knowledge source...");
 
-        SparqlEndpoint ep = new SparqlEndpoint(new URL(new String("http://localhost:8890/sparql")));
+        SparqlEndpoint ep = new SparqlEndpoint(new URL(sparqlEndpoint));
 
         ks = new SparqlEndpointKS(ep);//SparqlEndpoint.getEndpointDBpediaLiveAKSW());
 

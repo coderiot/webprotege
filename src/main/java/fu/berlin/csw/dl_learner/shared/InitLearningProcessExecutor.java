@@ -23,7 +23,7 @@ public class InitLearningProcessExecutor {
         this.dispatchServiceManager = dispatchServiceManager;
     }
 
-    public void execute(ProjectId projectId, OWLEntity selectedEntity, DispatchServiceCallback<InitLearningProcessResult> callback) {
-        dispatchServiceManager.execute(new InitLearningProcessAction(projectId , selectedEntity), callback);
+    public void execute(ProjectId projectId, OWLEntity selectedEntity, boolean useSparqlEndpoint, String sparqlEndpoint ,DispatchServiceCallback<InitLearningProcessResult> callback) {
+        dispatchServiceManager.execute(new InitLearningProcessAction(projectId , selectedEntity, useSparqlEndpoint, sparqlEndpoint), callback);
     }
 }
