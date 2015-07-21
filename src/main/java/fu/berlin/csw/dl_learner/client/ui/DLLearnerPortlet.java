@@ -5,6 +5,7 @@ import com.google.gwt.user.client.Window;
 import edu.stanford.bmir.protege.web.client.project.Project;
 import edu.stanford.bmir.protege.web.client.ui.library.msgbox.MessageBox;
 import edu.stanford.bmir.protege.web.client.ui.portlet.AbstractOWLEntityPortlet;
+import edu.stanford.bmir.protege.web.shared.selection.SelectionModel;
 import fu.berlin.csw.dl_learner.client.websocket.WebSocket;
 import fu.berlin.csw.dl_learner.client.websocket.exception.WebSocketNotSupportedException;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
@@ -23,8 +24,8 @@ public class DLLearnerPortlet extends AbstractOWLEntityPortlet {
     private DLLearnerBasePanel basePanel;
     static Logger logger = Logger.getLogger(DLLearnerPortlet.class.getName());
 
-    public DLLearnerPortlet(Project project) {
-        super(project);
+    public DLLearnerPortlet(SelectionModel selectionModel, Project project) {
+        super(selectionModel, project);
     }
 
 

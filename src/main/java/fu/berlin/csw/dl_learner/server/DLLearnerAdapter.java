@@ -14,7 +14,6 @@ import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLOntologyChangeFactory;
 import edu.stanford.bmir.protege.web.server.owlapi.RenameMap;
-import edu.stanford.bmir.protege.web.server.owlapi.change.OWLAPIChangeManager;
 import edu.stanford.bmir.protege.web.shared.axiom.OWLAxiomData;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.core.AbstractReasonerComponent;
