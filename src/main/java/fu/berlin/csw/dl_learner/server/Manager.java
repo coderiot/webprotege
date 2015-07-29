@@ -4,6 +4,7 @@ import edu.stanford.bmir.protege.web.server.inject.WebProtegeInjector;
 import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
+import edu.stanford.bmir.protege.web.shared.user.UserId;
 import fu.berlin.csw.dl_learner.server.websocket.SuggestionsWebSocketServer;
 import fu.berlin.csw.dl_learner.shared.InitLearningProcessException;
 import org.dllearner.core.ComponentInitException;
@@ -49,18 +50,18 @@ public class Manager {
     }
 
 
-    public void initLearnProcess(OWLAPIProject project, OWLEntity selectedEntity, boolean useSparqlEndpoint, String sparqlEndpoint) {
+    public void initLearnProcess(OWLAPIProject project, UserId userId, OWLEntity selectedEntity, boolean useSparqlEndpoint, String sparqlEndpoint) {
 
         ClassDescriptionLearner classDescriptionLearner = null;
 
         for (ClassDescriptionLearner cdl : classDescriptionLearnerSet){
-            if (project.getProjectId().hashCode() == cdl.hashCode()){
+            if (project.getProjectId().hashCode()*userId.hashCode() == cdl.hashCode()){
                 classDescriptionLearner = cdl;
             }
         }
 
         if (classDescriptionLearner == null ){
-            classDescriptionLearner = new DLLearnerAdapter(project);
+            classDescriptionLearner = new DLLearnerAdapter(project, userId);
             classDescriptionLearnerSet.add(classDescriptionLearner);
 
             logger.info("[DLLearner Plugin] Add new class description learner for project : " + project.getProjectId());
@@ -108,9 +109,9 @@ public class Manager {
 
 
 
-    public static ClassDescriptionLearner getProjectRelatedLearner(ProjectId projectId){
+    public static ClassDescriptionLearner getProjectRelatedLearner(ProjectId projectId, UserId userid){
         for (ClassDescriptionLearner cdl : classDescriptionLearnerSet){
-            if (cdl.hashCode() == projectId.hashCode()){
+            if (cdl.hashCode() == projectId.hashCode() * userid.hashCode()){
                 return cdl;
             }
         }

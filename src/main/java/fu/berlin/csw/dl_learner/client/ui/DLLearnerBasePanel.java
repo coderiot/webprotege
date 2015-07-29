@@ -43,8 +43,6 @@ public class DLLearnerBasePanel extends Composite {
                            HasEventHandlerManagement eventHandlerMan, DLLearnerPortlet wrapperPortlet) {
 
 
-
-
         this.projectId = projectId;
 
         this.eventHandlerMan = eventHandlerMan;
@@ -87,6 +85,10 @@ public class DLLearnerBasePanel extends Composite {
 
 
         //MessageBox.showAlert(new Boolean(wrapperPortlet.getSelectedEntity().isPresent()).toString());
+    }
+
+    public void setActive(boolean active){
+        this.commit.setEnabled(active);
     }
 
 }

@@ -4,6 +4,7 @@ import edu.stanford.bmir.protege.web.shared.project.ProjectId;
 
 import java.io.Serializable;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import edu.stanford.bmir.protege.web.shared.user.UserId;
 
 /**
  * Created by lars on 04.06.15.
@@ -13,6 +14,7 @@ public class SuggestionRequest implements Serializable, IsSerializable {
     private static final long serialVersionUID = -2974784212373773166L;
     private String data;
     private ProjectId projectId;
+    private UserId userId;
 
     /**
      * Default no-args constructor for GWT serialization purposes.
@@ -35,6 +37,15 @@ public class SuggestionRequest implements Serializable, IsSerializable {
 
     public ProjectId getProjectId(){
         return this.projectId;
+    }
+
+
+    public UserId getUserId(){
+        return this.userId;
+    }
+
+    public void setUserId(UserId userId){
+        this.userId = userId;
     }
 
 

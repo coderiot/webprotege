@@ -18,9 +18,7 @@ import edu.stanford.bmir.protege.web.client.Application;
 import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceCallback;
 import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceManager;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
-import fu.berlin.csw.dl_learner.shared.InitLearningProcessExecutor;
-import fu.berlin.csw.dl_learner.shared.InitLearningProcessResult;
-import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
+import fu.berlin.csw.dl_learner.shared.*;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.user.cellview.client.SimplePager;
 
@@ -198,14 +196,16 @@ public class SuggestionsWindow extends Window {
 
                 Application app = Application.get();
 
-
                 // invoke GetSuggestionAction and start learning process on the server
 
                 // TODO: No entity selected!!
                 cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), getUseSparqlEndpoint(), getSparqlEndpoint(), new DispatchServiceCallback<InitLearningProcessResult>() {
 
+
+
                     @Override
                     public void handleSuccess(InitLearningProcessResult result) {
+
                         GWT.log("Initialisation Process complete!: " +
                                 result.getMessage());
 
@@ -217,6 +217,7 @@ public class SuggestionsWindow extends Window {
                         final SuggestionRequest req = new SuggestionRequest();
                         req.setData("Suggestion Request");
                         req.setProjectId(projectId);
+                        req.setUserId(Application.get().getUserId());
 
 
                         Timer timer = new Timer()
@@ -279,6 +280,32 @@ public class SuggestionsWindow extends Window {
             @Override
             public void onClick(Button button, EventObject e) {
 
+                AddEquivalentClassExecutor cex = new AddEquivalentClassExecutor(DispatchServiceManager.get());
+
+                Application app = Application.get();
+
+                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), getSelectedClassExpressionId(), new DispatchServiceCallback<AddEquivalentClassResult>() {
+
+                    @Override
+                    public void handleSuccess(AddEquivalentClassResult result) {
+                        showDefaultCursor();
+                        GWT.log("Adding learned class description complete!: " +
+                                result.getMessage());
+
+
+                    }
+
+                    @Override
+                    public void handleExecutionException(Throwable cause) {
+                        showDefaultCursor();
+
+                        GWT.log("Server Exception during Adding learned class description!", cause);
+
+                    }
+
+
+                });
+                showWaitCursor();
 
             }
 
@@ -349,6 +376,11 @@ public class SuggestionsWindow extends Window {
 
     public boolean getUseSparqlEndpoint(){
         return this.useSparqlEndpoint;
+    }
+
+
+    public int getSelectedClassExpressionId(){
+        return suggestionsListView.getSelectedSuggestion().getClassExpressionId();
     }
 
 }

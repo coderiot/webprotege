@@ -36,10 +36,10 @@ public class SuggestionsPresenter implements WebSocketHandler {
     @Override
     public void onMessage(ServerReply reply) {
 
-        GWT.log("Suggestion received : " + reply.getData());
+        GWT.log("Message received : " + reply.getContext());
 
 
-        if (reply.getData().equals("Finished")){
+        if (reply.getContext().equals("Finished")){
 
             // Computation of class expression suggestions finished
 
@@ -48,7 +48,7 @@ public class SuggestionsPresenter implements WebSocketHandler {
             GWT.log("[DLLearner] Class learning process finished!");
             com.google.gwt.user.client.Window.alert("Class learning process finished!");
 
-        } else if (reply.getData().equals("Error")) {
+        } else if (reply.getContext().equals("Error")) {
 
             // Handle Server Error
 
@@ -64,9 +64,10 @@ public class SuggestionsPresenter implements WebSocketHandler {
                         "\n" + reply.getThrowable().getMessage());
             }
 
-        } else {
+        } else if (reply.getContext().equals("Suggestion")) {
 
             //  add class description suggestion
+
 
             suggestionsListView.addSuggestion(reply);
         }

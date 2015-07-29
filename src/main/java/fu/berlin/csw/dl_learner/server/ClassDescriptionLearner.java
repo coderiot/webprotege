@@ -2,9 +2,11 @@ package fu.berlin.csw.dl_learner.server;
 
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLEntity;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by lars on 11.06.15.
@@ -31,5 +33,6 @@ public interface ClassDescriptionLearner {
 
     public void init(ReasonerType reasonerType) throws Exception;
 
+    public void addLearnedDescriptionToProject(int classExpressionId);
 
 }

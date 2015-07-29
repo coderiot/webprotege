@@ -1,5 +1,7 @@
 package fu.berlin.csw.dl_learner.shared;
 
+import org.semanticweb.owlapi.model.OWLClassExpression;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -10,19 +12,29 @@ public class ServerReply implements Serializable {
 
 
     private static final long serialVersionUID = -2974784212373773166L;
-    private String data;
+    private String classExpressionManchesterString;
     private String username;
     private Date time;
     private String accuracy;
+    private int classExpressionId;
+    private String context;
 
     private Throwable throwable;
 
-    public String getData() {
-        return data;
+    public String getClassExpressionManchesterString() {
+        return classExpressionManchesterString;
     }
 
-    public void setData(String data) {
-        this.data = data;
+    public void setClassExpressionManchesterString(String classExpressionManchesterString) {
+        this.classExpressionManchesterString = classExpressionManchesterString;
+    }
+
+    public void setClassExpressionId(int classExpressionId){
+        this.classExpressionId = classExpressionId;
+    }
+
+    public int getClassExpressionId(){
+        return this.classExpressionId;
     }
 
     public String getUsername() {
@@ -59,7 +71,16 @@ public class ServerReply implements Serializable {
 
     @Override
     public String toString(){
-        return this.data;
+        return this.classExpressionManchesterString;
+    }
+
+
+    public void setContext(String context){
+        this.context = context;
+    }
+
+    public String getContext(){
+        return this.context;
     }
 
 }

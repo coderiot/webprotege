@@ -4,19 +4,16 @@ package fu.berlin.csw.dl_learner.server;
  * Created by lars on 29.04.15.
  */
 
-import com.clarkparsia.owlapiv3.OWL;
-import edu.stanford.bmir.protege.web.server.change.ChangeGenerationContext;
-import edu.stanford.bmir.protege.web.server.change.ChangeListGenerator;
+import com.clarkparsia.owlapiv3.OWL;;
+import edu.stanford.bmir.protege.web.server.change.FixedChangeListGenerator;
 import edu.stanford.bmir.protege.web.server.change.FixedMessageChangeDescriptionGenerator;
-import edu.stanford.bmir.protege.web.server.change.OntologyChangeList;
 import edu.stanford.bmir.protege.web.server.inject.WebProtegeInjector;
 import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
-import edu.stanford.bmir.protege.web.server.owlapi.OWLOntologyChangeFactory;
-import edu.stanford.bmir.protege.web.server.owlapi.RenameMap;
-import edu.stanford.bmir.protege.web.shared.axiom.OWLAxiomData;
+import edu.stanford.bmir.protege.web.shared.user.UserId;
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.core.AbstractReasonerComponent;
+import org.dllearner.core.EvaluatedDescription;
 import org.dllearner.core.KnowledgeSource;
 import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.kb.SparqlEndpointKS;
@@ -32,6 +29,7 @@ import org.semanticweb.owlapi.change.OWLOntologyChangeData;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+import uk.ac.manchester.cs.owl.owlapi.OWLEquivalentClassesAxiomImpl;
 
 
 import java.net.URL;
@@ -48,13 +46,17 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     private CELOE la;
     private AbstractReasonerComponent reasoner;   // SparqlReasoner ???
     private OWLAPIProject project;
+    private UserId userId;
     private OWLEntity selEntity;
     private AxiomType axiomType;
     private static WebProtegeLogger logger = WebProtegeInjector.get().getInstance(WebProtegeLogger.class);
+    private List<EvaluatedDescriptionClass> bestEvaluatedDescriptions;
+
+    private Set<OWLClassExpression> suggestedClassExpression;
 
 
-    public DLLearnerAdapter(OWLAPIProject project){
-
+    public DLLearnerAdapter(OWLAPIProject project, UserId userId){
+        this.userId = userId;
         this.project = project;
     }
 
@@ -295,13 +297,49 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         logger.info("[DLLearner] finished learning of " +
                 axiomType.getName() + " axioms");
 
+        this.bestEvaluatedDescriptions = getCurrentlyLearnedDescriptions();
+
+
 
 
     }
 
+
     @Override
     public int hashCode(){
-       return this.project.getProjectId().hashCode();
+       return this.project.getProjectId().hashCode() * userId.hashCode();
+    }
+
+
+    public void addSuggestedClassExpression(OWLClassExpression classExpression){
+        if (suggestedClassExpression == null){
+            suggestedClassExpression = new HashSet<>();
+        }
+        suggestedClassExpression.add(classExpression);
+    }
+
+    @Override
+    public void addLearnedDescriptionToProject(int classExpressionId){
+
+        Set<OWLClassExpression> exprSet = new HashSet<>();
+
+        /*ToDo id instead of hashcode*/
+        for (EvaluatedDescriptionClass evaluatedDescr : bestEvaluatedDescriptions){
+            if (classExpressionId == evaluatedDescr.hashCode()){
+                exprSet.add(evaluatedDescr.getDescription());
+            }
+        }
+
+        exprSet.add(selEntity.asOWLClass());
+        OWLAxiom equivClasses = new OWLEquivalentClassesAxiomImpl(exprSet, new HashSet<OWLAnnotation>());
+
+        OWLOntologyChange ontChange = new AddAxiom(project.getRootOntology(), equivClasses);
+
+        List<OWLOntologyChange> changeSet = new LinkedList<>();
+        changeSet.add(ontChange);
+
+
+        project.applyChanges(userId, FixedChangeListGenerator.get(changeSet), FixedMessageChangeDescriptionGenerator.get("added by DLLearner"));
     }
 
 

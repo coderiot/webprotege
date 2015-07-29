@@ -24,6 +24,7 @@ import java.util.*;
 
 import org.glassfish.tyrus.server.Server;
 import org.semanticweb.owlapi.model.*;
+import uk.ac.manchester.cs.owl.owlapi.OWLEquivalentClassesAxiomImpl;
 
 
 /**
@@ -58,44 +59,17 @@ public class InitLearningProcessActionHandler extends AbstractHasProjectActionHa
     @Override
     protected InitLearningProcessResult execute(InitLearningProcessAction action, OWLAPIProject project, ExecutionContext executionContext) {
 
-        
         /*argh*/
-
-
 
         String resultMessage = "Learning process successful initialised";
         Manager manager = Manager.getInstance();
 
-        manager.initLearnProcess(project, action.getSelectedEntity(), action.getUseSparqlEndpoint(), action.getSparqlEndpoint());
-
-
-
+        manager.initLearnProcess(project, executionContext.getUserId(), action.getSelectedEntity(), action.getUseSparqlEndpoint(), action.getSparqlEndpoint());
 
         return new InitLearningProcessResult(resultMessage);
 
     }
 
-
-    protected ChangeListGenerator<Set<OWLAnnotation>> getChangeListGenerator(InitLearningProcessAction action, OWLAPIProject project, ExecutionContext executionContext) {
-
-        OWLClass blubb = (OWLClass)project.getRootOntology().getClassesInSignature().toArray()[0];
-
-        OWLEquivalentClassesAxiom eqClasses = OWL.equivalentClasses(action.getSelectedEntity().asOWLClass(), blubb);
-
-        OWLAxiomChange addAxiom = new AddAxiom(project.getRootOntology(), eqClasses);
-
-        List<OWLOntologyChange> changeList = new ArrayList<OWLOntologyChange>();
-
-        changeList.add(addAxiom);
-
-        return new FixedChangeListGenerator<Set<OWLAnnotation>>(changeList) {
-
-        };
-    }
-
-    protected ChangeDescriptionGenerator<Set<OWLClassExpression>> getChangeDescription(InitLearningProcessAction action, OWLAPIProject project, ExecutionContext executionContext) {
-        return new FixedMessageChangeDescriptionGenerator<Set<OWLClassExpression>>("Created equivalent class expression");
-    }
 
 
 

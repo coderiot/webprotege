@@ -17,6 +17,9 @@ public class SuggestionsListView extends CellTable<ServerReply> {
 
     private List<ServerReply> list;
 
+    /* ToDo Change to Suggestion !!! */
+    private ServerReply selectedSuggestion;
+
     public SuggestionsListView(){
 
 
@@ -25,7 +28,7 @@ public class SuggestionsListView extends CellTable<ServerReply> {
         TextColumn<ServerReply> nameColumn = new TextColumn<ServerReply>() {
             @Override
             public String getValue(ServerReply suggestion) {
-                return suggestion.getData();
+                return suggestion.getClassExpressionManchesterString();
             }
         };
 
@@ -42,6 +45,7 @@ public class SuggestionsListView extends CellTable<ServerReply> {
         selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
                 ServerReply selected = selectionModel.getSelectedObject();
+                selectedSuggestion = selectionModel.getSelectedObject();
                 if (selected != null) {
                     //Window.alert("You selected: " + selected.getData());
                 }
@@ -69,7 +73,7 @@ public class SuggestionsListView extends CellTable<ServerReply> {
 
 
         for(ServerReply i : list){
-            GWT.log(i.getData());
+            GWT.log(i.getClassExpressionManchesterString());
         }
 
         ColumnSortEvent.ListHandler<ServerReply> columnSortHandler = new ColumnSortEvent.ListHandler<ServerReply>(
@@ -83,7 +87,7 @@ public class SuggestionsListView extends CellTable<ServerReply> {
 
                         // Compare the name columns.
                         if (o1 != null) {
-                            return (o2 != null) ? o1.getData().compareTo(o2.getData()) : 1;
+                            return (o2 != null) ? o1.getClassExpressionManchesterString().compareTo(o2.getClassExpressionManchesterString()) : 1;
                         }
                         return -1;
                     }
@@ -113,6 +117,9 @@ public class SuggestionsListView extends CellTable<ServerReply> {
         this.list.add(suggestion);
     }
 
+    public ServerReply getSelectedSuggestion(){
+        return this.selectedSuggestion;
+    }
 
 
 }
