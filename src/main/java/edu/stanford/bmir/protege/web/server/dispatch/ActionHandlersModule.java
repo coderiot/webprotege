@@ -50,6 +50,7 @@ import edu.stanford.bmir.protege.web.server.watches.AddWatchActionHandler;
 import edu.stanford.bmir.protege.web.server.watches.RemoveWatchActionHandler;
 import edu.stanford.bmir.protege.web.server.project.SetUIConfigurationActionHandler;
 import edu.stanford.bmir.protege.web.server.revision.*;
+import fu.berlin.csw.dl_learner.server.AddEquivalentClassActionHandler;
 import fu.berlin.csw.dl_learner.server.InitLearningProcessActionHandler;
 
 /**
@@ -176,6 +177,10 @@ public class ActionHandlersModule extends AbstractModule {
         multibinder.addBinding().to(RevertRevisionActionHandler.class);
 
         multibinder.addBinding().to(InitLearningProcessActionHandler.class);
+        multibinder.addBinding().to(AddEquivalentClassActionHandler.class);
+
+
+
         multibinder.addBinding().to(GetPersonIdCompletionsActionHandler.class);
         multibinder.addBinding().to(GetUserIdCompletionsActionHandler.class);
         multibinder.addBinding().to(GetPersonIdItemsActionHandler.class);
