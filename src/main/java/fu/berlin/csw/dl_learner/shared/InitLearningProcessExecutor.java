@@ -6,6 +6,7 @@ package fu.berlin.csw.dl_learner.shared;
 import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceCallback;
 import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceManager;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLEntity;
 
 import javax.inject.Inject;
@@ -23,7 +24,11 @@ public class InitLearningProcessExecutor {
         this.dispatchServiceManager = dispatchServiceManager;
     }
 
-    public void execute(ProjectId projectId, OWLEntity selectedEntity, boolean useSparqlEndpoint, String sparqlEndpoint ,DispatchServiceCallback<InitLearningProcessResult> callback) {
-        dispatchServiceManager.execute(new InitLearningProcessAction(projectId , selectedEntity, useSparqlEndpoint, sparqlEndpoint), callback);
+    public void execute(ProjectId projectId, OWLEntity selectedEntity, String sparqlEndpoint, AxiomType axiomType, int maxExecutionTimeInSeconds,
+                        int maxNrOfResults, int noisePercentage, int cardinalityLimit, boolean useAllConstructor, boolean useNegation,
+                        boolean useCardinalityRestrictions, boolean useExistsConstructor, boolean useHasValueConstructor,
+                        DispatchServiceCallback<InitLearningProcessResult> callback) {
+        dispatchServiceManager.execute(new InitLearningProcessAction(projectId , selectedEntity, sparqlEndpoint, axiomType, maxExecutionTimeInSeconds, maxNrOfResults,
+                noisePercentage, cardinalityLimit, useAllConstructor, useNegation, useCardinalityRestrictions, useExistsConstructor, useHasValueConstructor), callback);
     }
 }

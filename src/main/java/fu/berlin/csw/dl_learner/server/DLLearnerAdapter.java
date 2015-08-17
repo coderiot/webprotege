@@ -101,7 +101,9 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             long startTime = System.currentTimeMillis();
             la = new CELOE(lp, reasoner);
 
+
             RhoDRDown op = new RhoDRDown();
+
             op.setReasoner(reasoner);
             op.setUseNegation(false);//useNegation);
             op.setUseAllConstructor(true);//useAllConstructor);

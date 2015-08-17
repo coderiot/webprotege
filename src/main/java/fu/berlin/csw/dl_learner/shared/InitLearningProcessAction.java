@@ -2,6 +2,7 @@ package fu.berlin.csw.dl_learner.shared;
 
 import edu.stanford.bmir.protege.web.client.dispatch.AbstractHasProjectAction;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLEntity;
 
 import static com.google.common.base.Objects.toStringHelper;
@@ -14,8 +15,18 @@ public class InitLearningProcessAction extends AbstractHasProjectAction<InitLear
 
 
     private OWLEntity selectedEntity;
-    private boolean useSparqlEndpoint;
     private String sparqlEndpoint;
+    private AxiomType axiomType;
+
+    private int maxExecutionTimeInSeconds;
+    private int maxNrOfResults;
+    private int noisePercentage;
+    private int cardinalityLimit;
+    private boolean useAllConstructor;
+    private boolean useNegation;
+    private boolean useCardinalityRestrictions;
+    private boolean useExistsConstructor;
+    private boolean useHasValueConstructor;
 
     /**
      * For Serialization purposes only
@@ -23,11 +34,22 @@ public class InitLearningProcessAction extends AbstractHasProjectAction<InitLear
     private InitLearningProcessAction() {
     }
 
-    public InitLearningProcessAction(ProjectId projectId, OWLEntity selectedEntity, boolean useSparqlEndpoint, String sparqlEndpoint) {
+    public InitLearningProcessAction(ProjectId projectId, OWLEntity selectedEntity, String sparqlEndpoint, AxiomType axiomType, int maxExecutionTimeInSeconds,
+                                     int maxNrOfResults, int noisePercentage, int cardinalityLimit, boolean useAllConstructor, boolean useNegation,
+                                     boolean useCardinalityRestrictions, boolean useExistsConstructor, boolean useHasValueConstructor) {
         super(projectId);
         this.selectedEntity = selectedEntity;
-        this.useSparqlEndpoint = useSparqlEndpoint;
         this.sparqlEndpoint = sparqlEndpoint;
+        this.axiomType = axiomType;
+        this.maxExecutionTimeInSeconds = maxExecutionTimeInSeconds;
+        this.maxNrOfResults = maxNrOfResults;
+        this.noisePercentage= noisePercentage;
+        this.cardinalityLimit = cardinalityLimit;
+        this.useAllConstructor=useAllConstructor;
+        this.useNegation = useNegation;
+        this.useCardinalityRestrictions = useCardinalityRestrictions;
+        this.useExistsConstructor = useExistsConstructor;
+        this.useHasValueConstructor = useHasValueConstructor;
     }
 
     public OWLEntity getSelectedEntity(){
@@ -36,10 +58,6 @@ public class InitLearningProcessAction extends AbstractHasProjectAction<InitLear
 
     public String getSparqlEndpoint(){
         return this.sparqlEndpoint;
-    }
-
-    public boolean getUseSparqlEndpoint(){
-        return this.useSparqlEndpoint;
     }
 
 }

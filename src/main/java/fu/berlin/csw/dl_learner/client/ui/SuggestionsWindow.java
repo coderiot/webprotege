@@ -1,11 +1,7 @@
 package fu.berlin.csw.dl_learner.client.ui;
 
-import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
@@ -19,8 +15,8 @@ import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceCallback;
 import edu.stanford.bmir.protege.web.client.dispatch.DispatchServiceManager;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
 import fu.berlin.csw.dl_learner.shared.*;
-import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.user.cellview.client.SimplePager;
+import org.semanticweb.owlapi.model.AxiomType;
 
 
 /**
@@ -34,14 +30,11 @@ public class SuggestionsWindow extends Window {
     private Button cancelButton;
     private Button showCoverageButton;
     private SuggestionsListView suggestionsListView;
+    private ConfigurationPanel configurationsPanel;
+    private Window configurationsWindow;
 
     private String sparqlEndpoint;
     private Boolean useSparqlEndpoint = false;
-
-
-    final CssColor colorRed = CssColor.make("red");
-    final CssColor colorGreen = CssColor.make("green");
-    final CssColor colorBlue = CssColor.make("blue");
 
 
     public SuggestionsWindow(DLLearnerPortlet wrapperPortlet){
@@ -49,144 +42,71 @@ public class SuggestionsWindow extends Window {
         setTitle("Find equivalent Classes:");
         setWidth(500);
         setHeight(280);
-        //setLayout(new FitLayout());
 
-        this.addSuggestionsButton();
+        // create and add Buttons
+
+        this.addLearnEquivClassesButton();
+        this.addLearnSubClassesButton();
         this.addAddSuggestionButton();
         this.addCancelButton();
-        //this.addShowCoverageButton();
 
+
+        // create and add Configuration Window
+
+        this.configurationsPanel = new ConfigurationPanel();
+        this.configurationsWindow = new Window();
+        configurationsWindow.add(configurationsPanel);
+
+
+        // create and add Suggestions List View
 
         final DockLayoutPanel sp = new DockLayoutPanel(Style.Unit.EM);
-
-
         suggestionsListView = new SuggestionsListView();
-
         sp.addNorth(suggestionsListView, 16);
-        //this.add(suggestionsListView);
-
 
         SimplePager pager = new SimplePager();
         pager.setDisplay(suggestionsListView);
         pager.setPageSize(7);
 
-
-        //this.add(pager);
         sp.addNorth(pager, 16);
 
 
-        //hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
-        //hp.setHeight("10%");
-
-        StackPanel lp = new StackPanel();
-
-
-        Label label = new Label();
-        Label label2 = new Label();
-
-        CheckBox useSparqlCheckBox = new CheckBox();
-        TextBox useSparqlTextBox = new TextBox();
+        // add Configuration Button
 
         Button configButton = new Button();
         configButton.setText("Configure Learning Algorithm");
         configButton.setWidth("100%");
         configButton.setHeight("100%");
 
-
         configButton.addListener(new ButtonListenerAdapter(){
-
-            private TextBox sparqlEndpointTextBox;
-            private Window window;
-
-            public void closeWindow(){
-                this.window.close();
-            }
-
-            public void disableTextBox(){
-                sparqlEndpointTextBox.setEnabled(false);
-            }
-
-            public void enableTextBox(){
-                sparqlEndpointTextBox.setEnabled(true);
-            }
 
             @Override
             public void onClick(Button button, EventObject e) {
-
-                // Build Configuration Window
-
-                window = new Window();
-                window.setTitle("Configuration");
-
-                window.setHeight(100);
-                window.setWidth(300);
-
-                // Configure Use of Sparql Endpoint to receive instance data
-
-                CheckBox useSparqlCheckBox = new CheckBox();
-                useSparqlCheckBox.setText("use Sparql Reasoner ");
-
-                useSparqlCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-                    @Override
-                    public void onValueChange(ValueChangeEvent<Boolean> valueChangeEvent) {
-                        if (valueChangeEvent.getValue().equals(true)){
-                            setUseSparqlEndpoint(true);
-                            enableTextBox();
-                        } else {
-                            setUseSparqlEndpoint(false);
-                            disableTextBox();
-                        }
-                    }
-                });
-
-                sparqlEndpointTextBox = new TextBox();
-                sparqlEndpointTextBox.setEnabled(false);
-                sparqlEndpointTextBox.setWidth("100%");
-
-                sparqlEndpointTextBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-                    @Override
-                    public void onValueChange(ValueChangeEvent<String> event) {
-                        setSparqlEndpoint(event.getValue());
-                    }
-                });
-
-                Button okButton = new Button();
-
-                okButton.setText("OK");
-                okButton.setWidth("100%");
-                okButton.addListener(new ButtonListenerAdapter(){
-                    @Override
-                    public void onClick(Button button, EventObject e) {
-                        closeWindow();
-                    }
-                });
-
-                window.add(useSparqlCheckBox);
-                window.add(sparqlEndpointTextBox);
-                window.add(okButton);
-
-                window.show();
+                showConfigurationsWindow();
             }
         });
 
         sp.addSouth(configButton, 2);
-
         sp.setHeight("100%");
 
         this.add(sp);
-
-
-
 
     }
 
 
 
-    private void addSuggestionsButton(){
+
+    private void addLearnSubClassesButton(){
+        findEqualClassesButton = new Button();
+        findEqualClassesButton.setText("Find Sub Classes");
+
+    }
+
+
+    private void addLearnEquivClassesButton(){
 
         findEqualClassesButton = new Button();
         findEqualClassesButton.setText("Find Equivalent Classes");
-
 
         findEqualClassesButton.addListener(new ButtonListenerAdapter() {
             @Override
@@ -198,10 +118,27 @@ public class SuggestionsWindow extends Window {
 
                 // invoke GetSuggestionAction and start learning process on the server
 
-                // TODO: No entity selected!!
-                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), getUseSparqlEndpoint(), getSparqlEndpoint(), new DispatchServiceCallback<InitLearningProcessResult>() {
+                if (!getConfigurationsPanel().getUseSparqlEndpoint()){
+                    sparqlEndpoint = null;
+                } else {
+                    sparqlEndpoint = getConfigurationsPanel().getSparqlEndpoint();
+                }
 
+                AxiomType axiomType = AxiomType.EQUIVALENT_CLASSES;
+                int maxExecutionTimeInSeconds = getConfigurationsPanel().getMaxExecutionTime();
+                int maxNrOfResults = getConfigurationsPanel().getMaxNumberOfResults();
+                int noisePercentage = getConfigurationsPanel().getNoisePercentage();
+                int cardinalityLimit = getConfigurationsPanel().getCardinalityLimit();
+                boolean useAllConstructor = getConfigurationsPanel().getUseAllConstructor();
+                boolean useNegation = getConfigurationsPanel().getUseNegation();
+                boolean useCardinalityRestrictions = getConfigurationsPanel().getUseCardinalityRestriction();
+                boolean useExistsConstructor = getConfigurationsPanel().getUseExistsConstructorVal();  // ToDo Reafactor
+                boolean useHasValueConstructor = getConfigurationsPanel().getUseHasValueConstructor();
 
+                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), sparqlEndpoint,
+                        axiomType, maxExecutionTimeInSeconds, maxNrOfResults, noisePercentage, cardinalityLimit, useAllConstructor,
+                        useNegation, useCardinalityRestrictions, useExistsConstructor, useHasValueConstructor,
+                        new DispatchServiceCallback<InitLearningProcessResult>() {
 
                     @Override
                     public void handleSuccess(InitLearningProcessResult result) {
@@ -253,8 +190,6 @@ public class SuggestionsWindow extends Window {
                     }
                 });
                 showWaitCursor();
-
-
 
             }
 
@@ -317,7 +252,6 @@ public class SuggestionsWindow extends Window {
         toolbar.addElement(addSuggestionButton.getElement());
         addSuggestionButton.setWidth("33%");
 
-
     }
 
 
@@ -329,7 +263,7 @@ public class SuggestionsWindow extends Window {
         cancelButton.addListener(new ButtonListenerAdapter() {
             @Override
             public void onClick(Button button, EventObject e) {
-
+                // ToDo: ...
 
             }
 
@@ -361,26 +295,23 @@ public class SuggestionsWindow extends Window {
 
 
 
-    public void setSparqlEndpoint(String endpoint){
-        GWT.log(endpoint);
-        this.sparqlEndpoint=endpoint;
-    }
 
-    public String getSparqlEndpoint(){
-        return this.sparqlEndpoint;
-    }
-
-    public void setUseSparqlEndpoint(boolean useSparqlEndpoint){
-        this.useSparqlEndpoint = useSparqlEndpoint;
-    }
-
-    public boolean getUseSparqlEndpoint(){
-        return this.useSparqlEndpoint;
-    }
 
 
     public int getSelectedClassExpressionId(){
         return suggestionsListView.getSelectedSuggestion().getClassExpressionId();
     }
 
+
+    private void showConfigurationsWindow(){
+        this.configurationsWindow.show();
+    }
+
+    private void hideConfigurationsWindow(){
+        this.configurationsWindow.hide();
+    }
+
+    private ConfigurationPanel getConfigurationsPanel(){
+        return this.configurationsPanel;
+    }
 }

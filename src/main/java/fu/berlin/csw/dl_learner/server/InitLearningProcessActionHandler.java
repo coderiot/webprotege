@@ -64,7 +64,7 @@ public class InitLearningProcessActionHandler extends AbstractHasProjectActionHa
         String resultMessage = "Learning process successful initialised";
         Manager manager = Manager.getInstance();
 
-        manager.initLearnProcess(project, executionContext.getUserId(), action.getSelectedEntity(), action.getUseSparqlEndpoint(), action.getSparqlEndpoint());
+        manager.initLearnProcess(project, executionContext.getUserId(), action.getSelectedEntity(), action.getSparqlEndpoint());
 
         return new InitLearningProcessResult(resultMessage);
 

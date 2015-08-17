@@ -50,7 +50,7 @@ public class Manager {
     }
 
 
-    public void initLearnProcess(OWLAPIProject project, UserId userId, OWLEntity selectedEntity, boolean useSparqlEndpoint, String sparqlEndpoint) {
+    public void initLearnProcess(OWLAPIProject project, UserId userId, OWLEntity selectedEntity, String sparqlEndpoint) {
 
         ClassDescriptionLearner classDescriptionLearner = null;
 
@@ -73,7 +73,7 @@ public class Manager {
             classDescriptionLearner.setAxiomType(AxiomType.EQUIVALENT_CLASSES);            // TODO: generic solution
             classDescriptionLearner.setEntity(selectedEntity);
 
-            if (useSparqlEndpoint){
+            if (sparqlEndpoint != null){
                 classDescriptionLearner.initKnowledgeSource(ReasonerType.SPARQL_REASONER, sparqlEndpoint);     // TODO: generic solution
                 classDescriptionLearner.initReasoner(ReasonerType.SPARQL_REASONER);
             } else {

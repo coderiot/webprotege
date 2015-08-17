@@ -1,0 +1,89 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:checkbox="urn:import:fu.berlin.csw.dl_learner.client.ui">
+    <ui:style>
+        .check-box-panel {
+            padding-top: 5px;
+            padding-left: 5px;
+        }
+        .checkBox {
+            display: block;
+            padding-bottom: 3px;
+        }
+        .checkBox input {
+            width: 18px;
+            height: 18px;
+        }
+        .checkBox label {
+            padding-left: 5px;
+        }
+
+        .heading {
+            font-weight: bold;
+            font-size: 120%;
+            padding-bottom: 20px;
+        }
+        .column-heading {
+            font-weight: bold;
+        }
+        .main-panel {
+            padding: 10px;
+            background: #ffffff;
+        }
+        .select-link {
+            color: #0000ff;
+            text-decoration: underline;
+            font-size: 90%;
+            cursor: pointer;
+        }
+        .text-box-panel {
+            padding-top: 5px;
+            padding-left: 5px;
+            height: 10px;
+            background: #ffffff;
+            font-size: 90%;
+        }
+    </ui:style>
+
+    <g:HTMLPanel styleName="{style.check-box-panel}">
+        <div>
+            <g:InlineLabel text="Configure Sparql Endpoint" styleName="{style.column-heading}"/>
+        </div>
+        <div style="padding-left: 15px; padding-top: 5px; padding-right: 15px; padding-down: 15px;">
+            <checkbox:ConfigurationCheckBox ui:field='useSparqlCheckBox' addStyleNames="{style.checkBox}" configName="use sparql endpoint"/>
+            <g:TextBox ui:field="sparqlEndpointTextBox" addStyleNames="{style.text-box-panel}"></g:TextBox>
+        </div>
+        <div style="padding-top: 15px">
+            <g:InlineLabel text="Configure Algorithm Settings" styleName="{style.column-heading}"/>
+        </div>
+        <div style="padding-left: 15px; padding-top: 5px; padding-right: 15px; padding-down: 15px;">
+            <div>
+                <g:InlineLabel text="Max Execution Time"/>
+            </div>
+            <g:IntegerBox ui:field="maxExecutionTime" addStyleNames="{style.text-box-panel}" value="10"></g:IntegerBox>
+            <div>
+                <g:InlineLabel text="Max Number Of Results"/>
+            </div>
+            <g:IntegerBox ui:field="maxNumberOfResults" addStyleNames="{style.text-box-panel}" value="10"></g:IntegerBox>
+            <div>
+                <g:InlineLabel text="Noise Percentage"/>
+            </div>
+            <g:IntegerBox ui:field="noisePercentage" addStyleNames="{style.text-box-panel}" value="5"></g:IntegerBox>
+
+            <checkbox:ConfigurationCheckBox ui:field='useCardinalityRestrictions' addStyleNames="{style.checkBox}" configName="use cardinality restrictions" value="true"/>
+            <g:IntegerBox ui:field="cardinalityLimit" addStyleNames="{style.text-box-panel}" value="10"></g:IntegerBox>
+
+
+            <checkbox:ConfigurationCheckBox ui:field='useNegation' addStyleNames="{style.checkBox}" configName="use negation" value="false"/>
+            <checkbox:ConfigurationCheckBox ui:field='useHasValueConstructor' addStyleNames="{style.checkBox}" configName="use HasValueConstructor" value="false"/>
+            <checkbox:ConfigurationCheckBox ui:field='useExistsConstructor' addStyleNames="{style.checkBox}" configName="use ExistsConstructor" value="true"/>
+            <checkbox:ConfigurationCheckBox ui:field='useAllConstructor' addStyleNames="{style.checkBox}" configName="use AllConstructor" value="true"/>
+
+        </div>
+
+    </g:HTMLPanel>
+
+
+
+
+</ui:UiBinder>

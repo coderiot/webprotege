@@ -59,12 +59,9 @@ public class SuggestionsWebSocketServer {
             timer.schedule(new TimerTask() {
                 int i = 0;
                 List<EvaluatedDescriptionClass> result;
-                boolean learningHasStarted = false;
 
                 @Override
                 synchronized public void run() {
-                    //setProgress(progress);
-
 
                     /*das geht schöner!*/
                     if ( /*!isCancelled() &&*/  Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).isLearning()) {
@@ -77,32 +74,20 @@ public class SuggestionsWebSocketServer {
                                     if (!alreadySendDescriptions.contains(descr)){
                                         alreadySendDescriptions.add(descr);
                                         ServerReply suggestion = new ServerReply();
-                                        suggestion.setClassExpressionManchesterString(OWLAPIRenderers.toManchesterOWLSyntax(descr.getDescription()));  // ToDo: Refactor  setData-method
+                                        suggestion.setClassExpressionManchesterString(OWLAPIRenderers.toManchesterOWLSyntax(descr.getDescription()));
                                         suggestion.setAccuracy(new Double(descr.getAccuracy()).toString());
                                         suggestion.setClassExpressionId(descr.hashCode());  // ToDo: id instead of Hashcode
                                         suggestion.setContext("Suggestion");
                                         logger.info("[DLLearner] Send suggestion : " + result.toString());
                                         sendSuggestion(suggestion, session);
-
-
-
-                                        /*OWLClassExpression expr = descr.getDescription();
-                                        Set<OWLClassExpression> exprSet = new HashSet<>();
-                                        exprSet.add(expr);
-
-                                        Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).applyEquivClassesChange(exprSet);
-                                        */
+                                        i++;
                                     }
                                 }
-
-                                i++;
                             }
-
                     }
                 }
 
             }, 10, 50);
-
 
             Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).startLearning();
 
