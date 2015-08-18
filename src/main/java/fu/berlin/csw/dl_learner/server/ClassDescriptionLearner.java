@@ -27,11 +27,10 @@ public interface ClassDescriptionLearner {
 
     public void initReasoner(ReasonerType reasonerType) throws Exception;
 
-    public void initLearningAlgorithm() throws Exception;
+    public void initLearningAlgorithm(boolean useAllConstructor, boolean useExistConstructor, boolean useHasValueConstructor
+            , boolean useCardinalityLimit, int cardinalityLimit, int maxExecutionTime, int noisePercentage, int maxNumberOfResults, boolean useNegation) throws Exception;
 
     public void initLearningProblem() throws Exception;
-
-    public void init(ReasonerType reasonerType) throws Exception;
 
     public void addLearnedDescriptionToProject(int classExpressionId);
 

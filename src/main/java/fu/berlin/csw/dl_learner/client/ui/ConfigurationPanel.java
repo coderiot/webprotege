@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.*;
 import com.gwtext.client.core.EventObject;
 import com.gwtext.client.widgets.Button;
 import com.gwtext.client.widgets.event.ButtonListenerAdapter;
+import org.semanticweb.owlapi.model.AxiomType;
 
 /**
  * Created by lars on 17.08.15.
@@ -28,6 +29,11 @@ public class ConfigurationPanel extends Composite{//Window {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
+    @UiField
+    public CheckBox equivClasses;
+
+    @UiField
+    public CheckBox subClasses;
 
     @UiField
     public CheckBox useSparqlCheckBox;
@@ -63,6 +69,27 @@ public class ConfigurationPanel extends Composite{//Window {
     @UiField
     IntegerBox maxExecutionTime;
 
+    // ToDo Refactor
+
+    @UiHandler("equivClasses")
+    public void onValueChange4(ValueChangeEvent<Boolean> valueChangeEvent) {
+        if (valueChangeEvent.getValue().equals(true)){
+            disableSubClasses();
+        } else {
+            enableSubClasses();
+        }
+    }
+
+    @UiHandler("subClasses")
+    public void onValueChange5(ValueChangeEvent<Boolean> valueChangeEvent) {
+        if (valueChangeEvent.getValue().equals(true)){
+            disableEquivClasses();
+        } else {
+            enableEquivClasses();
+        }
+    }
+
+
 
     @UiHandler("useSparqlCheckBox")
     public void onValueChange(ValueChangeEvent<Boolean> valueChangeEvent) {
@@ -73,6 +100,7 @@ public class ConfigurationPanel extends Composite{//Window {
         }
         GWT.log("HALLO BLAH");
     }
+
 
     @UiHandler("useCardinalityRestrictions")
     public void onValueChange2(ValueChangeEvent<Boolean> valueChangeEvent) {
@@ -128,6 +156,8 @@ public class ConfigurationPanel extends Composite{//Window {
             ((IntegerBox) event.getSource()).cancelKey();
         }
     }
+
+
 
 
 
@@ -240,5 +270,31 @@ public class ConfigurationPanel extends Composite{//Window {
 
     public boolean getUseCardinalityRestriction(){
         return this.useCardinalityRestrictions.getValue();
+    }
+
+
+    private void disableEquivClasses(){
+        this.equivClasses.setValue(false);
+    }
+
+    private void enableEquivClasses(){
+        this.equivClasses.setValue(true);
+    }
+
+
+    private void disableSubClasses(){
+        this.subClasses.setValue(false);
+    }
+
+    private void enableSubClasses(){
+        this.subClasses.setValue(true);
+    }
+
+    public AxiomType getAxiomType(){
+        if (equivClasses.getValue()){
+            return AxiomType.EQUIVALENT_CLASSES;
+        } else {
+            return AxiomType.SUBCLASS_OF;
+        }
     }
 }

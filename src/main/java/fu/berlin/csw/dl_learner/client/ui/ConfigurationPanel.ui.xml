@@ -47,6 +47,13 @@
 
     <g:HTMLPanel styleName="{style.check-box-panel}">
         <div>
+            <g:InlineLabel text="Configure Axiom Type" styleName="{style.column-heading}"/>
+        </div>
+        <div style="padding-left: 15px; padding-top: 5px; padding-right: 15px; padding-down: 15px;">
+            <checkbox:ConfigurationCheckBox ui:field='equivClasses' addStyleNames="{style.checkBox}" configName="Equivalent Classes" value="true"/>
+            <checkbox:ConfigurationCheckBox ui:field='subClasses' addStyleNames="{style.checkBox}" configName="Subclasses"/>
+        </div>
+        <div>
             <g:InlineLabel text="Configure Sparql Endpoint" styleName="{style.column-heading}"/>
         </div>
         <div style="padding-left: 15px; padding-top: 5px; padding-right: 15px; padding-down: 15px;">

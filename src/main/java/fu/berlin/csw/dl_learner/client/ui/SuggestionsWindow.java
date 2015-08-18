@@ -124,7 +124,7 @@ public class SuggestionsWindow extends Window {
                     sparqlEndpoint = getConfigurationsPanel().getSparqlEndpoint();
                 }
 
-                AxiomType axiomType = AxiomType.EQUIVALENT_CLASSES;
+                AxiomType axiomType = getConfigurationsPanel().getAxiomType();
                 int maxExecutionTimeInSeconds = getConfigurationsPanel().getMaxExecutionTime();
                 int maxNrOfResults = getConfigurationsPanel().getMaxNumberOfResults();
                 int noisePercentage = getConfigurationsPanel().getNoisePercentage();
@@ -184,9 +184,7 @@ public class SuggestionsWindow extends Window {
                             com.google.gwt.user.client.Window.alert("Server Exception during initialisation of learning process! See GWT log for details!" +
                                     "\n" + cause.getMessage());
                         }
-
-                        //MessageBox.showErrorMessage("Server Exception during initialisation of learning process!",
-                        //        cause);
+                        
                     }
                 });
                 showWaitCursor();

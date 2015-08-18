@@ -60,4 +60,46 @@ public class InitLearningProcessAction extends AbstractHasProjectAction<InitLear
         return this.sparqlEndpoint;
     }
 
+    public AxiomType getAxiomType(){
+        return this.axiomType;
+    }
+
+    public int getMaxExecutionTimeInSeconds(){
+        return this.maxExecutionTimeInSeconds;
+    }
+
+    public int getMaxNumberOfResults(){
+        return this.maxNrOfResults;
+    }
+
+    public int getCardinalityLimit(){
+        return this.cardinalityLimit;
+    }
+
+    public boolean getUseCardinalityRestrictions(){
+        return this.useCardinalityRestrictions;
+    }
+
+    public int getNoisePercentage(){
+        return this.noisePercentage;
+    }
+
+    public int getMaxNrOfResults(){
+        return this.maxNrOfResults;
+    }
+
+    public boolean getUseNegation(){
+        return this.useNegation;
+    }
+
+    public boolean getUseAllConstructor(){
+        return this.useAllConstructor;
+    }
+    public boolean getUseExistsConstructor(){
+        return this.useExistsConstructor;
+    }
+    public boolean getUseHasValueConstructor(){
+        return this.useHasValueConstructor;
+    }
+
 }

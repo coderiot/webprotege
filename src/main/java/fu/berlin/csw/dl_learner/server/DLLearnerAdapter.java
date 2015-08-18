@@ -61,19 +61,6 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     }
 
 
-    ///  kann weg
-
-    @Override
-    public synchronized void init(ReasonerType reasonerType) throws Exception{
-        //initKnowledgeSource(reasonerType);
-        //if(reinitNecessary){
-        initReasoner(reasonerType);
-        //}
-        initLearningProblem();
-        initLearningAlgorithm();
-        //reinitNecessary = false;
-    }
-
     @Override
     public synchronized void initLearningProblem() throws Exception {
         logger.info("[DLLearner] init learning problem...");
@@ -95,7 +82,8 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
 
     @Override
-    public synchronized void initLearningAlgorithm() throws Exception {
+    public synchronized void initLearningAlgorithm(boolean useAllConstructor, boolean useExistConstructor, boolean useHasValueConstructor
+            , boolean useCardinalityLimit, int cardinalityLimit, int maxExecutionTime, int noisePercentage, int maxNumberOfResults, boolean useNegation) throws Exception {
         try {
             logger.info("[DLLearner] init learning algorithm...");
             long startTime = System.currentTimeMillis();
@@ -105,21 +93,21 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             RhoDRDown op = new RhoDRDown();
 
             op.setReasoner(reasoner);
-            op.setUseNegation(false);//useNegation);
-            op.setUseAllConstructor(true);//useAllConstructor);
-            op.setUseCardinalityRestrictions(true);//useCardinalityRestrictions);
+            op.setUseNegation(useNegation);//useNegation);
+            op.setUseAllConstructor(useAllConstructor);//useAllConstructor);
+            op.setUseCardinalityRestrictions(useCardinalityLimit);//useCardinalityRestrictions);
             //if(useCardinalityRestrictions){
-            op.setCardinalityLimit(5);//cardinalityLimit);
+            op.setCardinalityLimit(cardinalityLimit);//cardinalityLimit);
             //}
-            op.setUseExistsConstructor(true);//useExistsConstructor);
-            op.setUseHasValueConstructor(false);//useHasValueConstructor);
+            op.setUseExistsConstructor(useExistConstructor);//useExistsConstructor);
+            op.setUseHasValueConstructor(useHasValueConstructor);//useHasValueConstructor);
             op.init();
 
             la.setOperator(op);
 
-            la.setMaxExecutionTimeInSeconds(10);//maxExecutionTimeInSeconds);
-            la.setNoisePercentage(5);//noisePercentage);
-            la.setMaxNrOfResults(10);//maxNrOfResults);
+            la.setMaxExecutionTimeInSeconds(maxExecutionTime);//maxExecutionTimeInSeconds);
+            la.setNoisePercentage(noisePercentage);//noisePercentage);
+            la.setMaxNrOfResults(maxNumberOfResults);//maxNrOfResults);
 
             la.init();
             logger.info("[DLLearner] Initialisation of learning algorithm done in " + (System.currentTimeMillis()-startTime) + "ms.");
@@ -311,7 +299,6 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     public int hashCode(){
        return this.project.getProjectId().hashCode() * userId.hashCode();
     }
-
 
     public void addSuggestedClassExpression(OWLClassExpression classExpression){
         if (suggestedClassExpression == null){

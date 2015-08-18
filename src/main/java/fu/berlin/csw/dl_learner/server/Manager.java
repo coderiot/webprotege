@@ -50,7 +50,9 @@ public class Manager {
     }
 
 
-    public void initLearnProcess(OWLAPIProject project, UserId userId, OWLEntity selectedEntity, String sparqlEndpoint) {
+    public void initLearnProcess(OWLAPIProject project, UserId userId, OWLEntity selectedEntity, String sparqlEndpoint,
+                                 AxiomType axiomType, boolean useAllConstructor, boolean useExistConstructor, boolean useHasValueConstructor
+            , boolean useCardinalityLimit, int cardinalityLimit, int maxExecutionTime, int noisePercentage, int maxNumberOfResults, boolean useNegation) {
 
         ClassDescriptionLearner classDescriptionLearner = null;
 
@@ -70,7 +72,7 @@ public class Manager {
         try {
 
 
-            classDescriptionLearner.setAxiomType(AxiomType.EQUIVALENT_CLASSES);            // TODO: generic solution
+            classDescriptionLearner.setAxiomType(axiomType);            // TODO: generic solution
             classDescriptionLearner.setEntity(selectedEntity);
 
             if (sparqlEndpoint != null){
@@ -81,7 +83,8 @@ public class Manager {
                 classDescriptionLearner.initReasoner(ReasonerType.PELLET_REASONER);
             }
             classDescriptionLearner.initLearningProblem();
-            classDescriptionLearner.initLearningAlgorithm();
+            classDescriptionLearner.initLearningAlgorithm( useAllConstructor,  useExistConstructor,  useHasValueConstructor
+            ,  useCardinalityLimit,  cardinalityLimit,  maxExecutionTime,  noisePercentage,  maxNumberOfResults,  useNegation);
 
             logger.info("[DLLearner Plugin] Initialisation of learning process finished.");
             logger.info("[DLLearner Plugin] Start learning.");
