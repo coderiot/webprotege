@@ -75,7 +75,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
         lp = new ClassLearningProblem(reasoner);
 
-        logger.info(selEntity.getEntityType().toString());
+        logger.info("[DLLearner]" + selEntity.getEntityType().toString());
 
         lp.setClassToDescribe(selEntity.asOWLClass());
 
@@ -319,6 +319,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         if (this.axiomType == AxiomType.EQUIVALENT_CLASSES){
             Set<OWLClassExpression> exprSet = new HashSet<>();
             exprSet.add(subequivclass);
+            exprSet.add(selEntity.asOWLClass());
             axiomToAdd = new OWLEquivalentClassesAxiomImpl(exprSet, new HashSet<OWLAnnotation>());
         } else {
             axiomToAdd = new OWLSubClassOfAxiomImpl(selEntity.asOWLClass(), subequivclass, new HashSet<OWLAnnotation>());

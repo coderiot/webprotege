@@ -38,7 +38,7 @@ public class SuggestionsWindow extends Window {
 
     public SuggestionsWindow(DLLearnerPortlet wrapperPortlet){
         this.wrapperPortlet = wrapperPortlet;
-        setTitle("DLLearner:");
+        setTitle("DLLearner " + wrapperPortlet.getSelectedEntity().get().asOWLClass().getIRI() + "[EquivalentClasses]");
         setWidth(500);
         setHeight(280);
 
@@ -332,6 +332,12 @@ public class SuggestionsWindow extends Window {
     }
 
     public void changeTitle(){
+
+        if (!wrapperPortlet.getSelectedEntity().get().isOWLClass()){
+            startLearningButton.disable();
+            return;
+        }
+
         OWLClass selectedClass = wrapperPortlet.getSelectedEntity().get().asOWLClass();
 
 
