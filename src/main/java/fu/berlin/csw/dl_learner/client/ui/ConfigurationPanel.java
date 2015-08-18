@@ -1,9 +1,7 @@
 package fu.berlin.csw.dl_learner.client.ui;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -21,6 +19,8 @@ import org.semanticweb.owlapi.model.AxiomType;
  */
 public class ConfigurationPanel extends Composite{//Window {
 
+
+    private SuggestionsWindow wrapper;
 
 
     @UiTemplate("ConfigurationPanel.ui.xml")
@@ -69,14 +69,25 @@ public class ConfigurationPanel extends Composite{//Window {
     @UiField
     IntegerBox maxExecutionTime;
 
-    // ToDo Refactor
+
+    @UiField
+    com.google.gwt.user.client.ui.Button okbutton;
+
+
+    @UiHandler("okbutton")
+    public void onClick(ClickEvent clickEvent){
+        wrapper.hideConfigurationsWindow();
+    }
+
 
     @UiHandler("equivClasses")
     public void onValueChange4(ValueChangeEvent<Boolean> valueChangeEvent) {
         if (valueChangeEvent.getValue().equals(true)){
             disableSubClasses();
+            wrapper.changeTitle();
         } else {
             enableSubClasses();
+            wrapper.changeTitle();
         }
     }
 
@@ -84,8 +95,10 @@ public class ConfigurationPanel extends Composite{//Window {
     public void onValueChange5(ValueChangeEvent<Boolean> valueChangeEvent) {
         if (valueChangeEvent.getValue().equals(true)){
             disableEquivClasses();
+            wrapper.changeTitle();
         } else {
             enableEquivClasses();
+            wrapper.changeTitle();
         }
     }
 
@@ -162,44 +175,17 @@ public class ConfigurationPanel extends Composite{//Window {
 
 
 
-    public ConfigurationPanel(){
+    public ConfigurationPanel(SuggestionsWindow wrapper){
+
+        this.wrapper = wrapper;
 
         initWidget(uiBinder.createAndBindUi(this));
 
-
         useSparqlCheckBox.setValue(getUseSparqlEndpoint());
-
-
-        GWT.log("Blah1");
 
         sparqlEndpointTextBox.setEnabled(getUseSparqlEndpoint());
         sparqlEndpointTextBox.setText(getSparqlEndpoint());
 
-        /*
-        sparqlEndpointTextBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                setSparqlEndpoint(event.getValue());
-            }
-        });
-        */
-
-        GWT.log("Blah2");
-
-
-        Button okButton = new Button();
-
-        okButton.setText("OK");
-        okButton.setWidth("100%");
-        okButton.addListener(new ButtonListenerAdapter(){
-            @Override
-            public void onClick(Button button, EventObject e) {
-                hideWindow();
-            }
-        });
-
-
-        GWT.log("INIT WIDGET!!!");
 
 
     }
@@ -214,15 +200,6 @@ public class ConfigurationPanel extends Composite{//Window {
     private void enableCardinalityLimit(boolean enabled){
         cardinalityLimit.setEnabled(enabled);
     }
-
-
-    // ToDo:  hide via wrapper Window
-    private void hideWindow(){
-        //this.hide();
-    }
-
-
-
 
     public boolean getUseSparqlEndpoint(){
         return this.useSparqlCheckBox.getValue();
@@ -297,4 +274,5 @@ public class ConfigurationPanel extends Composite{//Window {
             return AxiomType.SUBCLASS_OF;
         }
     }
+
 }

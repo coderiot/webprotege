@@ -17,6 +17,7 @@ import edu.stanford.bmir.protege.web.shared.project.ProjectId;
 import fu.berlin.csw.dl_learner.shared.*;
 import com.google.gwt.user.cellview.client.SimplePager;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLClass;
 
 
 /**
@@ -25,35 +26,32 @@ import org.semanticweb.owlapi.model.AxiomType;
 public class SuggestionsWindow extends Window {
 
     private DLLearnerPortlet wrapperPortlet;
-    private Button findEqualClassesButton;
+    private Button startLearningButton;
     private Button addSuggestionButton;
     private Button cancelButton;
-    private Button showCoverageButton;
     private SuggestionsListView suggestionsListView;
     private ConfigurationPanel configurationsPanel;
     private Window configurationsWindow;
 
     private String sparqlEndpoint;
-    private Boolean useSparqlEndpoint = false;
 
 
     public SuggestionsWindow(DLLearnerPortlet wrapperPortlet){
         this.wrapperPortlet = wrapperPortlet;
-        setTitle("Find equivalent Classes:");
+        setTitle("DLLearner:");
         setWidth(500);
         setHeight(280);
 
         // create and add Buttons
 
-        this.addLearnEquivClassesButton();
-        this.addLearnSubClassesButton();
+        this.addStartLearningButton();
         this.addAddSuggestionButton();
         this.addCancelButton();
 
 
         // create and add Configuration Window
 
-        this.configurationsPanel = new ConfigurationPanel();
+        this.configurationsPanel = new ConfigurationPanel(this);
         this.configurationsWindow = new Window();
         configurationsWindow.add(configurationsPanel);
 
@@ -95,22 +93,17 @@ public class SuggestionsWindow extends Window {
 
 
 
+    private void addStartLearningButton(){
 
-    private void addLearnSubClassesButton(){
-        findEqualClassesButton = new Button();
-        findEqualClassesButton.setText("Find Sub Classes");
+        startLearningButton = new Button();
+        startLearningButton.setText("Start Learning");
 
-    }
-
-
-    private void addLearnEquivClassesButton(){
-
-        findEqualClassesButton = new Button();
-        findEqualClassesButton.setText("Find Equivalent Classes");
-
-        findEqualClassesButton.addListener(new ButtonListenerAdapter() {
+        startLearningButton.addListener(new ButtonListenerAdapter() {
             @Override
             public void onClick(Button button, EventObject e) {
+
+                suggestionsListView.clearList();
+
                 InitLearningProcessExecutor cex = new InitLearningProcessExecutor(DispatchServiceManager.get());
                 final ProjectId projectId = Application.get().getActiveProject().get();
 
@@ -184,7 +177,7 @@ public class SuggestionsWindow extends Window {
                             com.google.gwt.user.client.Window.alert("Server Exception during initialisation of learning process! See GWT log for details!" +
                                     "\n" + cause.getMessage());
                         }
-                        
+
                     }
                 });
                 showWaitCursor();
@@ -196,8 +189,8 @@ public class SuggestionsWindow extends Window {
         setTopToolbar(new Toolbar());
         Toolbar toolbar = getTopToolbar();
 
-        toolbar.addElement(findEqualClassesButton.getElement());
-        findEqualClassesButton.setWidth("33%");
+        toolbar.addElement(startLearningButton.getElement());
+        startLearningButton.setWidth("33%");
 
 
     }
@@ -206,21 +199,21 @@ public class SuggestionsWindow extends Window {
     private void addAddSuggestionButton(){
 
         addSuggestionButton = new Button();
-        addSuggestionButton.setText("Add Class Suggestion");
+        addSuggestionButton.setText("Add Axiom");
 
 
         addSuggestionButton.addListener(new ButtonListenerAdapter() {
             @Override
             public void onClick(Button button, EventObject e) {
 
-                AddEquivalentClassExecutor cex = new AddEquivalentClassExecutor(DispatchServiceManager.get());
+                AddAxiomExecutor cex = new AddAxiomExecutor(DispatchServiceManager.get());
 
                 Application app = Application.get();
 
-                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), getSelectedClassExpressionId(), new DispatchServiceCallback<AddEquivalentClassResult>() {
+                cex.execute(app.getActiveProject().get(), wrapperPortlet.getSelectedEntity().get(), getSelectedClassExpressionId(), new DispatchServiceCallback<AddAxiomResult>() {
 
                     @Override
-                    public void handleSuccess(AddEquivalentClassResult result) {
+                    public void handleSuccess(AddAxiomResult result) {
                         showDefaultCursor();
                         GWT.log("Adding learned class description complete!: " +
                                 result.getMessage());
@@ -261,11 +254,35 @@ public class SuggestionsWindow extends Window {
         cancelButton.addListener(new ButtonListenerAdapter() {
             @Override
             public void onClick(Button button, EventObject e) {
-                // ToDo: ...
 
+                CancelLearningExecutor cex = new CancelLearningExecutor(DispatchServiceManager.get());
+
+                Application app = Application.get();
+
+                cex.execute(app.getActiveProject().get(), new DispatchServiceCallback<CancelLearningResult>() {
+
+                    @Override
+                    public void handleSuccess(CancelLearningResult result) {
+                        showDefaultCursor();
+                        GWT.log("Adding learned class description complete!: " +
+                                result.getMessage());
+
+                    }
+
+                    @Override
+                    public void handleExecutionException(Throwable cause) {
+                        showDefaultCursor();
+                        GWT.log("Server Exception during Adding learned class description!", cause);
+                    }
+
+
+                });
+
+                showWaitCursor();
             }
 
         });
+
 
         setTopToolbar(new Toolbar());
         Toolbar toolbar = getTopToolbar();
@@ -274,6 +291,9 @@ public class SuggestionsWindow extends Window {
 
         cancelButton.setWidth("33%");
     }
+
+
+
 
 
 
@@ -294,8 +314,6 @@ public class SuggestionsWindow extends Window {
 
 
 
-
-
     public int getSelectedClassExpressionId(){
         return suggestionsListView.getSelectedSuggestion().getClassExpressionId();
     }
@@ -305,11 +323,21 @@ public class SuggestionsWindow extends Window {
         this.configurationsWindow.show();
     }
 
-    private void hideConfigurationsWindow(){
+    public void hideConfigurationsWindow(){
         this.configurationsWindow.hide();
     }
 
     private ConfigurationPanel getConfigurationsPanel(){
         return this.configurationsPanel;
     }
+
+    public void changeTitle(){
+        OWLClass selectedClass = wrapperPortlet.getSelectedEntity().get().asOWLClass();
+
+
+        configurationsPanel.getAxiomType();
+
+        this.setTitle("DLLearner " + selectedClass.getIRI() + " [" + getConfigurationsPanel().getAxiomType() + "]");
+    }
+
 }

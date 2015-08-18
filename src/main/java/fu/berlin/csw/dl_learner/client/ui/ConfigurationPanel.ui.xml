@@ -87,7 +87,10 @@
             <checkbox:ConfigurationCheckBox ui:field='useAllConstructor' addStyleNames="{style.checkBox}" configName="use AllConstructor" value="true"/>
 
         </div>
-
+        <div>
+        <g:Button width="100%" height="10" ui:field='okbutton'> OK
+        </g:Button>
+        </div>
     </g:HTMLPanel>
 
 

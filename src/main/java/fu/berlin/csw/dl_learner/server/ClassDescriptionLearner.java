@@ -34,4 +34,8 @@ public interface ClassDescriptionLearner {
 
     public void addLearnedDescriptionToProject(int classExpressionId);
 
+    public void cancelLearning();
+
+    public boolean isCancelled();
+
 }

@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import uk.ac.manchester.cs.owl.owlapi.OWLEquivalentClassesAxiomImpl;
+import uk.ac.manchester.cs.owl.owlapi.OWLSubClassOfAxiomImpl;
 
 
 import java.net.URL;
@@ -51,6 +52,8 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     private AxiomType axiomType;
     private static WebProtegeLogger logger = WebProtegeInjector.get().getInstance(WebProtegeLogger.class);
     private List<EvaluatedDescriptionClass> bestEvaluatedDescriptions;
+    private int maxNrOfResults;
+    private boolean cancelled = false;
 
     private Set<OWLClassExpression> suggestedClassExpression;
 
@@ -63,6 +66,10 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
     @Override
     public synchronized void initLearningProblem() throws Exception {
+        cancelled = false;
+
+        bestEvaluatedDescriptions = new LinkedList<EvaluatedDescriptionClass>();
+
         logger.info("[DLLearner] init learning problem...");
         long startTime = System.currentTimeMillis();
 
@@ -74,7 +81,8 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
 
         lp.setEquivalence(axiomType.equals(EQUIVALENT_CLASSES));
-        //lp.setCheckConsistency(DLLearnerPreferences.getInstance().isCheckConsistencyWhileLearning());
+
+
         lp.init();
 
         logger.info("[DLLearner] Initialisation of learning problem done in " + (System.currentTimeMillis() - startTime) + "ms.");
@@ -89,18 +97,19 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             long startTime = System.currentTimeMillis();
             la = new CELOE(lp, reasoner);
 
+            this.maxNrOfResults = maxNumberOfResults;
 
             RhoDRDown op = new RhoDRDown();
 
             op.setReasoner(reasoner);
-            op.setUseNegation(useNegation);//useNegation);
-            op.setUseAllConstructor(useAllConstructor);//useAllConstructor);
-            op.setUseCardinalityRestrictions(useCardinalityLimit);//useCardinalityRestrictions);
-            //if(useCardinalityRestrictions){
-            op.setCardinalityLimit(cardinalityLimit);//cardinalityLimit);
-            //}
-            op.setUseExistsConstructor(useExistConstructor);//useExistsConstructor);
-            op.setUseHasValueConstructor(useHasValueConstructor);//useHasValueConstructor);
+            op.setUseNegation(useNegation);
+            op.setUseAllConstructor(useAllConstructor);
+            op.setUseCardinalityRestrictions(useCardinalityLimit);
+            if(useCardinalityLimit){
+                op.setCardinalityLimit(cardinalityLimit);
+            }
+            op.setUseExistsConstructor(useExistConstructor);
+            op.setUseHasValueConstructor(useHasValueConstructor);
             op.init();
 
             la.setOperator(op);
@@ -112,10 +121,8 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             la.init();
             logger.info("[DLLearner] Initialisation of learning algorithm done in " + (System.currentTimeMillis()-startTime) + "ms.");
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (Error e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -147,15 +154,6 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
             reasoner.prepareSubsumptionHierarchy();
 
-            int i = 1;
-            for (OWLClass owlClass : reasoner.getClasses()){
-                System.out.println(owlClass);
-                ++i;
-                if (i==10){
-                    break;
-                }
-            }
-
             reasoner.getClasses().contains(selEntity.asOWLClass());
 
 
@@ -180,11 +178,9 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         reasoner = new ClosedWorldReasoner(Collections.singleton(ks));
         ((ClosedWorldReasoner)reasoner).setReasonerComponent(baseReasoner);
 
-        //reasoner.setProgressMonitor(progressMonitor);TODO integrate progress monitor
         reasoner.init();
 
         logger.info("[DLLearner] Hermit Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
-        //reinitNecessary = false; TODO
     }
 
 
@@ -231,9 +227,9 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
         SparqlEndpoint ep = new SparqlEndpoint(new URL(sparqlEndpoint));
 
-        ks = new SparqlEndpointKS(ep);//SparqlEndpoint.getEndpointDBpediaLiveAKSW());
+        ks = new SparqlEndpointKS(ep);
 
-        ((SparqlEndpointKS)ks).setUseCache(false);  //  DEBUG
+        ((SparqlEndpointKS)ks).setUseCache(false);
 
         ks.init();
         logger.info("[DLLearner] initialisation of sparql knowledge source done");
@@ -269,7 +265,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         List<EvaluatedDescriptionClass> result;
         if (la != null) {
             result = Collections.unmodifiableList((List<EvaluatedDescriptionClass>) la
-                    .getCurrentlyBestEvaluatedDescriptions(10/*maxNrOfResults*/, 0.5/*threshold*/, true));
+                    .getCurrentlyBestEvaluatedDescriptions(maxNrOfResults, 0.5, true));
         } else {
             result = Collections.emptyList();
         }
@@ -310,27 +306,43 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     @Override
     public void addLearnedDescriptionToProject(int classExpressionId){
 
-        Set<OWLClassExpression> exprSet = new HashSet<>();
+        OWLClassExpression subequivclass = null;
+        OWLAxiom axiomToAdd = null;
 
         /*ToDo id instead of hashcode*/
         for (EvaluatedDescriptionClass evaluatedDescr : bestEvaluatedDescriptions){
             if (classExpressionId == evaluatedDescr.hashCode()){
-                exprSet.add(evaluatedDescr.getDescription());
+                subequivclass = evaluatedDescr.getDescription();
             }
         }
 
-        exprSet.add(selEntity.asOWLClass());
-        OWLAxiom equivClasses = new OWLEquivalentClassesAxiomImpl(exprSet, new HashSet<OWLAnnotation>());
+        if (this.axiomType == AxiomType.EQUIVALENT_CLASSES){
+            Set<OWLClassExpression> exprSet = new HashSet<>();
+            exprSet.add(subequivclass);
+            axiomToAdd = new OWLEquivalentClassesAxiomImpl(exprSet, new HashSet<OWLAnnotation>());
+        } else {
+            axiomToAdd = new OWLSubClassOfAxiomImpl(selEntity.asOWLClass(), subequivclass, new HashSet<OWLAnnotation>());
 
-        OWLOntologyChange ontChange = new AddAxiom(project.getRootOntology(), equivClasses);
+        }
+
+        OWLOntologyChange ontChange = new AddAxiom(project.getRootOntology(), axiomToAdd);
 
         List<OWLOntologyChange> changeSet = new LinkedList<>();
         changeSet.add(ontChange);
 
-
         project.applyChanges(userId, FixedChangeListGenerator.get(changeSet), FixedMessageChangeDescriptionGenerator.get("added by DLLearner"));
     }
 
+    @Override
+    public void cancelLearning(){
+        la.stop();
+        cancelled = true;
+    }
+
+    @Override
+    public boolean isCancelled(){
+        return cancelled;
+    }
 
 
 }

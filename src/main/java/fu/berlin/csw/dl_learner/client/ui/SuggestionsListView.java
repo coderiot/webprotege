@@ -121,5 +121,8 @@ public class SuggestionsListView extends CellTable<ServerReply> {
         return this.selectedSuggestion;
     }
 
+    public void clearList(){
+        this.list.clear();
+    }
 
 }

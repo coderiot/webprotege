@@ -44,6 +44,8 @@ public class DLLearnerPortlet extends AbstractOWLEntityPortlet {
             public void handleSelectionChanged(EntityDataSelectionChangedEvent event) {
                 boolean active = false;
 
+                basePanel.forwardSelectionEvent(event);
+
                 Optional<OWLEntity> selectedEntity = getSelectedEntity();
 
                 if (selectedEntity.get() instanceof OWLClass){
@@ -53,6 +55,8 @@ public class DLLearnerPortlet extends AbstractOWLEntityPortlet {
                 }
 
                 basePanel.setActive(active);
+
+
 
             }
         });

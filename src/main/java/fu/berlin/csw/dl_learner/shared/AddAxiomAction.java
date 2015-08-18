@@ -2,25 +2,25 @@ package fu.berlin.csw.dl_learner.shared;
 
 import edu.stanford.bmir.protege.web.client.dispatch.AbstractHasProjectAction;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLEntity;
 
 /**
  * Created by lars on 27.07.15.
  */
-public class AddEquivalentClassAction extends AbstractHasProjectAction<AddEquivalentClassResult> {
+public class AddAxiomAction extends AbstractHasProjectAction<AddAxiomResult> {
 
     private OWLEntity selectedEntity;
     private int classExpressionId;
+    private AxiomType axiomType;
 
     /**
      * For Serialization purposes only
      */
-    private AddEquivalentClassAction() {
+    private AddAxiomAction() {
     }
 
-    public AddEquivalentClassAction(ProjectId projectId, OWLEntity selectedEntity, int classExpressionId) {
+    public AddAxiomAction(ProjectId projectId, OWLEntity selectedEntity, int classExpressionId) {
         super(projectId);
         this.selectedEntity = selectedEntity;
         this.classExpressionId = classExpressionId;

@@ -19,14 +19,13 @@ import javax.websocket.server.ServerEndpoint;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamReader;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
-import com.mongodb.util.Hash;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProjectManager;
+import fu.berlin.csw.dl_learner.server.ClassDescriptionLearner;
 import fu.berlin.csw.dl_learner.server.Manager;
 import fu.berlin.csw.dl_learner.shared.ServerReply;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.dllearner.utilities.owl.OWLAPIRenderers;
-import org.semanticweb.owlapi.model.OWLClassExpression;
 
 @ServerEndpoint(value = "/suggestions/{projectId}")
 public class SuggestionsWebSocketServer {
@@ -63,8 +62,9 @@ public class SuggestionsWebSocketServer {
                 @Override
                 synchronized public void run() {
 
-                    /*das geht schöner!*/
-                    if ( /*!isCancelled() &&*/  Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).isLearning()) {
+
+                    if ( !isCancelled(Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()))
+                            &&  Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).isLearning()) {
 
                             result = Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).getCurrentlyLearnedDescriptions();
                             logger.info("[DLLearner] Currently learned descriptions: " + result.toString());
@@ -87,7 +87,7 @@ public class SuggestionsWebSocketServer {
                     }
                 }
 
-            }, 10, 50);
+            }, 100, 50);
 
             Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).startLearning();
 
@@ -136,6 +136,10 @@ public class SuggestionsWebSocketServer {
 
     }
 
+
+    private boolean isCancelled(ClassDescriptionLearner learner){
+        return learner.isCancelled();
+    }
 
 
     @OnOpen

@@ -14,7 +14,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class InitLearningProcessResult implements Result {
     private String message;
-    //private PaginationData<EvaluatedDescriptionClass> paginationData;
 
     /**
      * For serialization only
@@ -22,18 +21,13 @@ public class InitLearningProcessResult implements Result {
     private InitLearningProcessResult() {
     }
 
-    public InitLearningProcessResult(String message){//, PaginationData<EvaluatedDescriptionClass> paginationData) {
-        //this.paginationData = paginationData;
+    public InitLearningProcessResult(String message){
         this.message = message;
     }
 
     public String getMessage() {
         return message;
     }
-
-    //public PaginationData<EvaluatedDescription> getPaginationData() {
-    //    return this.paginationData;
-    //}
 
 
 }

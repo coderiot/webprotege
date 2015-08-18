@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.gwtext.client.widgets.layout.FitLayout;
 import edu.stanford.bmir.protege.web.shared.event.HasEventHandlerManagement;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
+import edu.stanford.bmir.protege.web.shared.selection.EntityDataSelectionChangedEvent;
 
 import java.awt.*;
 
@@ -28,6 +29,8 @@ public class DLLearnerBasePanel extends Composite {
 
     SuggestionsPresenter presenter;
 
+    SuggestionsWindow suggList;
+
     @UiTemplate("DLLearnerBasePanel.ui.xml")
     interface MyUiBinder extends UiBinder<Widget, DLLearnerBasePanel> {
     }
@@ -36,7 +39,7 @@ public class DLLearnerBasePanel extends Composite {
 
 
     @UiField
-    Button commit;
+    Button dllearner;
 
 
     public DLLearnerBasePanel(final ProjectId projectId,
@@ -59,36 +62,32 @@ public class DLLearnerBasePanel extends Composite {
 
 
 
-    @UiHandler("commit")
+    @UiHandler("dllearner")
     void handleClick(ClickEvent e) {
 
         final com.gwtext.client.widgets.Window window = new com.gwtext.client.widgets.Window();
-        window.setTitle("Find equivalent Classes:");
+        window.setTitle("Start DLLearner:");
         window.setWidth(500);
         window.setHeight(365);
         window.setLayout(new FitLayout());
 
-        //DLLearnerPanel dllearnerPanel = new DLLearnerPanel(wrapperPortlet, null);
 
-        //dllearnerPanel.setSelectedEntity(wrapperPortlet.getSelectedEntity().get());
-
-
-        SuggestionsWindow suggList = new SuggestionsWindow(wrapperPortlet);
+        suggList = new SuggestionsWindow(wrapperPortlet);
 
         suggList.show();
 
-
-        //window.add(suggList);
-
-        //window.show();
-
-
-
-        //MessageBox.showAlert(new Boolean(wrapperPortlet.getSelectedEntity().isPresent()).toString());
     }
 
     public void setActive(boolean active){
-        this.commit.setEnabled(active);
+        this.dllearner.setEnabled(active);
+    }
+
+
+    public void forwardSelectionEvent(EntityDataSelectionChangedEvent event){
+        GWT.log("Event has been forwarded");
+        if (suggList != null){
+            suggList.changeTitle();
+        }
     }
 
 }
