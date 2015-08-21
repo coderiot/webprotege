@@ -4,13 +4,16 @@ package fu.berlin.csw.dl_learner.server;
  * Created by lars on 29.04.15.
  */
 
-import com.clarkparsia.owlapiv3.OWL;;
+import com.clarkparsia.owlapiv3.OWL;
+
 import edu.stanford.bmir.protege.web.server.change.FixedChangeListGenerator;
 import edu.stanford.bmir.protege.web.server.change.FixedMessageChangeDescriptionGenerator;
 import edu.stanford.bmir.protege.web.server.inject.WebProtegeInjector;
 import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
+import edu.stanford.bmir.protege.web.shared.permissions.PermissionDeniedException;
 import edu.stanford.bmir.protege.web.shared.user.UserId;
+
 import org.dllearner.algorithms.celoe.CELOE;
 import org.dllearner.core.AbstractReasonerComponent;
 import org.dllearner.core.EvaluatedDescription;
@@ -29,9 +32,9 @@ import org.semanticweb.owlapi.change.OWLOntologyChangeData;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
+
 import uk.ac.manchester.cs.owl.owlapi.OWLEquivalentClassesAxiomImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLSubClassOfAxiomImpl;
-
 
 import java.net.URL;
 import java.util.*;
@@ -269,11 +272,13 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         } else {
             result = Collections.emptyList();
         }
+        bestEvaluatedDescriptions.addAll(result);
         return result;
     }
 
     @Override
     public synchronized void startLearning(){
+    	bestEvaluatedDescriptions = new ArrayList<EvaluatedDescriptionClass>();
 
         logger.info("[DLLearner] started learning of " +
                 axiomType.getName() + " axioms");
@@ -283,7 +288,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         logger.info("[DLLearner] finished learning of " +
                 axiomType.getName() + " axioms");
 
-        this.bestEvaluatedDescriptions = getCurrentlyLearnedDescriptions();
+//        this.bestEvaluatedDescriptions = getCurrentlyLearnedDescriptions();
 
 
 
@@ -306,32 +311,35 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     @Override
     public void addLearnedDescriptionToProject(int classExpressionId){
 
-        OWLClassExpression subequivclass = null;
-        OWLAxiom axiomToAdd = null;
+        try {
+			OWLClassExpression subequivclass = null;
+			OWLAxiom axiomToAdd = null;
+			
+			/*ToDo id instead of hashcode*/
+			for (EvaluatedDescriptionClass evaluatedDescr : bestEvaluatedDescriptions){
+			    if (classExpressionId == evaluatedDescr.getDescription().hashCode()){
+			        subequivclass = evaluatedDescr.getDescription();
+			    }
+			}
 
-        /*ToDo id instead of hashcode*/
-        for (EvaluatedDescriptionClass evaluatedDescr : bestEvaluatedDescriptions){
-            if (classExpressionId == evaluatedDescr.hashCode()){
-                subequivclass = evaluatedDescr.getDescription();
-            }
-        }
+			if (this.axiomType == AxiomType.EQUIVALENT_CLASSES){
+			    Set<OWLClassExpression> exprSet = new HashSet<>();
+			    exprSet.add(subequivclass);
+			    exprSet.add(selEntity.asOWLClass());
+			    axiomToAdd = new OWLEquivalentClassesAxiomImpl(exprSet, new HashSet<OWLAnnotation>());
+			} else {
+			    axiomToAdd = new OWLSubClassOfAxiomImpl(selEntity.asOWLClass(), subequivclass, new HashSet<OWLAnnotation>());
+			}
 
-        if (this.axiomType == AxiomType.EQUIVALENT_CLASSES){
-            Set<OWLClassExpression> exprSet = new HashSet<>();
-            exprSet.add(subequivclass);
-            exprSet.add(selEntity.asOWLClass());
-            axiomToAdd = new OWLEquivalentClassesAxiomImpl(exprSet, new HashSet<OWLAnnotation>());
-        } else {
-            axiomToAdd = new OWLSubClassOfAxiomImpl(selEntity.asOWLClass(), subequivclass, new HashSet<OWLAnnotation>());
+			OWLOntologyChange ontChange = new AddAxiom(project.getRootOntology(), axiomToAdd);
 
-        }
+			List<OWLOntologyChange> changeSet = new LinkedList<>();
+			changeSet.add(ontChange);
 
-        OWLOntologyChange ontChange = new AddAxiom(project.getRootOntology(), axiomToAdd);
-
-        List<OWLOntologyChange> changeSet = new LinkedList<>();
-        changeSet.add(ontChange);
-
-        project.applyChanges(userId, FixedChangeListGenerator.get(changeSet), FixedMessageChangeDescriptionGenerator.get("added by DLLearner"));
+			project.applyChanges(userId, FixedChangeListGenerator.get(changeSet), FixedMessageChangeDescriptionGenerator.get("added by DLLearner"));
+		} catch (Exception e) {
+			logger.severe(e);
+		}
     }
 
     @Override

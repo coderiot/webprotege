@@ -1,7 +1,5 @@
 package fu.berlin.csw.dl_learner.shared;
 
-import org.semanticweb.owlapi.model.OWLClassExpression;
-
 import java.io.Serializable;
 import java.util.Date;
 

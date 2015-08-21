@@ -19,11 +19,13 @@ import javax.websocket.server.ServerEndpoint;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamReader;
 import com.google.gwt.user.server.rpc.impl.ServerSerializationStreamWriter;
+
 import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProjectManager;
 import fu.berlin.csw.dl_learner.server.ClassDescriptionLearner;
 import fu.berlin.csw.dl_learner.server.Manager;
 import fu.berlin.csw.dl_learner.shared.ServerReply;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
+
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.dllearner.utilities.owl.OWLAPIRenderers;
 
@@ -56,38 +58,42 @@ public class SuggestionsWebSocketServer {
             // ask for solutions and send them to the client gradually
 
             timer.schedule(new TimerTask() {
-                int i = 0;
+                
                 List<EvaluatedDescriptionClass> result;
 
                 @Override
                 synchronized public void run() {
+                	int i = 0;
 
+                    ClassDescriptionLearner learner = Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId());
+					
+                    if ( !isCancelled(learner) && learner.isLearning()) {
 
-                    if ( !isCancelled(Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()))
-                            &&  Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).isLearning()) {
-
-                            result = Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).getCurrentlyLearnedDescriptions();
+                            result = learner.getCurrentlyLearnedDescriptions();
                             logger.info("[DLLearner] Currently learned descriptions: " + result.toString());
-                            if(result.size()>i){
-
-                                for (EvaluatedDescriptionClass descr : Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).getCurrentlyLearnedDescriptions()){
-                                    if (!alreadySendDescriptions.contains(descr)){
-                                        alreadySendDescriptions.add(descr);
-                                        ServerReply suggestion = new ServerReply();
-                                        suggestion.setClassExpressionManchesterString(OWLAPIRenderers.toManchesterOWLSyntax(descr.getDescription()));
-                                        suggestion.setAccuracy(new Double(descr.getAccuracy()).toString());
-                                        suggestion.setClassExpressionId(descr.hashCode());  // ToDo: id instead of Hashcode
-                                        suggestion.setContext("Suggestion");
-                                        logger.info("[DLLearner] Send suggestion : " + result.toString());
-                                        sendSuggestion(suggestion, session);
-                                        i++;
-                                    }
-                                }
-                            }
+                            try {
+								if(result.size()>i){
+								    for (EvaluatedDescriptionClass descr : result){
+								        if (!alreadySendDescriptions.contains(descr)){
+								            alreadySendDescriptions.add(descr);
+								            ServerReply suggestion = new ServerReply();
+								            suggestion.setClassExpressionManchesterString(OWLAPIRenderers.toManchesterOWLSyntax(descr.getDescription()));
+								            suggestion.setAccuracy(new Double(descr.getAccuracy()).toString());
+								            suggestion.setClassExpressionId(descr.getDescription().hashCode());  // ToDo: id instead of Hashcode
+								            suggestion.setContext("Suggestion");
+								            logger.info("[DLLearner] Send suggestion : " + suggestion.toString());
+								            sendSuggestion(suggestion, session);
+//								            i++;
+								        }
+								    }
+								}
+							} catch (Exception e) {
+								logger.severe(e.getMessage());
+							}
                     }
                 }
 
-            }, 100, 50);
+            }, 100, 1000);
 
             Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).startLearning();
 
@@ -132,6 +138,8 @@ public class SuggestionsWebSocketServer {
 
            // Todo
 
+        } finally {
+        	timer.cancel();
         }
 
     }
