@@ -4,51 +4,79 @@ package fu.berlin.csw.dl_learner.server;
  * Created by lars on 29.04.15.
  */
 
-import com.clarkparsia.owlapiv3.OWL;
+import static org.semanticweb.owlapi.model.AxiomType.EQUIVALENT_CLASSES;
 
-import edu.stanford.bmir.protege.web.server.change.FixedChangeListGenerator;
-import edu.stanford.bmir.protege.web.server.change.FixedMessageChangeDescriptionGenerator;
-import edu.stanford.bmir.protege.web.server.inject.WebProtegeInjector;
-import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
-import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
-import edu.stanford.bmir.protege.web.shared.permissions.PermissionDeniedException;
-import edu.stanford.bmir.protege.web.shared.user.UserId;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import org.dllearner.algorithms.celoe.CELOE;
+import org.dllearner.algorithms.el.ELLearningAlgorithm;
+import org.dllearner.core.AbstractCELA;
 import org.dllearner.core.AbstractReasonerComponent;
-import org.dllearner.core.EvaluatedDescription;
 import org.dllearner.core.KnowledgeSource;
 import org.dllearner.kb.OWLAPIOntology;
 import org.dllearner.kb.SparqlEndpointKS;
+import org.dllearner.kb.sparql.ClassBasedSampleGenerator;
 import org.dllearner.kb.sparql.SparqlEndpoint;
 import org.dllearner.learningproblems.ClassLearningProblem;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.dllearner.reasoning.ClosedWorldReasoner;
 import org.dllearner.reasoning.OWLAPIReasoner;
+import org.dllearner.reasoning.ReasonerImplementation;
 import org.dllearner.reasoning.SPARQLReasoner;
 import org.dllearner.refinementoperators.RhoDRDown;
 import org.semanticweb.HermiT.Reasoner;
-import org.semanticweb.owlapi.change.OWLOntologyChangeData;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyChange;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 
 import uk.ac.manchester.cs.owl.owlapi.OWLEquivalentClassesAxiomImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLSubClassOfAxiomImpl;
 
-import java.net.URL;
-import java.util.*;
-import java.util.logging.Logger;
+import com.google.common.collect.Sets;
 
-import static org.semanticweb.owlapi.model.AxiomType.EQUIVALENT_CLASSES;
+import edu.stanford.bmir.protege.web.server.change.FixedChangeListGenerator;
+import edu.stanford.bmir.protege.web.server.change.FixedMessageChangeDescriptionGenerator;
+import edu.stanford.bmir.protege.web.server.inject.WebProtegeInjector;
+import edu.stanford.bmir.protege.web.server.logging.WebProtegeLogger;
+import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProject;
+import edu.stanford.bmir.protege.web.shared.user.UserId;
 
 public class DLLearnerAdapter implements ClassDescriptionLearner {//implements ManagerService {
+	
+	// DBpedia specific constants
+	// TODO: load from file, i.e. be more flexible
+	private static final HashSet<String> allowedObjectNamespaces = Sets.newHashSet("http://dbpedia.org/ontology/", "http://dbpedia.org/resource/");
+	private static final HashSet<String> allowedPropertyNameSpaces = Sets.newHashSet("http://dbpedia.org/ontology/");
+	private static final Set<String> ignoredProperties = Sets.newHashSet(
+			"http://dbpedia.org/ontology/wikiPageRevisionID",
+			"http://dbpedia.org/ontology/wikiPageID",
+			"http://dbpedia.org/ontology/abstract",
+			"http://dbpedia.org/ontology/alias"
+			,"http://dbpedia.org/ontology/number"
+			,"http://dbpedia.org/ontology/endowment"
+			);
 
 
     private KnowledgeSource ks;
     private ClassLearningProblem lp;
-    private CELOE la;
+    private AbstractCELA la;
     private AbstractReasonerComponent reasoner;   // SparqlReasoner ???
+    
     private OWLAPIProject project;
     private UserId userId;
     private OWLEntity selEntity;
@@ -59,6 +87,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     private boolean cancelled = false;
 
     private Set<OWLClassExpression> suggestedClassExpression;
+	private boolean useEL;
 
 
     public DLLearnerAdapter(OWLAPIProject project, UserId userId){
@@ -98,28 +127,42 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         try {
             logger.info("[DLLearner] init learning algorithm...");
             long startTime = System.currentTimeMillis();
-            la = new CELOE(lp, reasoner);
-
-            this.maxNrOfResults = maxNumberOfResults;
-
-            RhoDRDown op = new RhoDRDown();
-
-            op.setReasoner(reasoner);
-            op.setUseNegation(useNegation);
-            op.setUseAllConstructor(useAllConstructor);
-            op.setUseCardinalityRestrictions(useCardinalityLimit);
-            if(useCardinalityLimit){
-                op.setCardinalityLimit(cardinalityLimit);
+            if(useEL) {
+            	ELLearningAlgorithm el = new ELLearningAlgorithm(lp, reasoner);
+//        		el.setStartClass(cls);
+        		el.setClassToDescribe(selEntity.asOWLClass());
+        		el.setMaxExecutionTimeInSeconds(maxExecutionTime);
+        		el.setNoisePercentage(noisePercentage);
+        		el.setMaxNrOfResults(maxNumberOfResults);
+        		el.init();
+        		
+        		la = el;
+            } else {
+            	CELOE celoe = new CELOE(lp, reasoner);
+	
+	            this.maxNrOfResults = maxNumberOfResults;
+	
+	            RhoDRDown op = new RhoDRDown();
+	
+	            op.setReasoner(reasoner);
+	            op.setUseNegation(useNegation);
+	            op.setUseAllConstructor(useAllConstructor);
+	            op.setUseCardinalityRestrictions(useCardinalityLimit);
+	            if(useCardinalityLimit){
+	                op.setCardinalityLimit(cardinalityLimit);
+	            }
+	            op.setUseExistsConstructor(useExistConstructor);
+	            op.setUseHasValueConstructor(useHasValueConstructor);
+	            op.init();
+	
+	            celoe.setOperator(op);
+	            
+	            celoe.setMaxExecutionTimeInSeconds(maxExecutionTime);//maxExecutionTimeInSeconds);
+	            celoe.setNoisePercentage(noisePercentage);//noisePercentage);
+	            celoe.setMaxNrOfResults(maxNumberOfResults);//maxNrOfResults);
+	            
+	            la = celoe;
             }
-            op.setUseExistsConstructor(useExistConstructor);
-            op.setUseHasValueConstructor(useHasValueConstructor);
-            op.init();
-
-            la.setOperator(op);
-
-            la.setMaxExecutionTimeInSeconds(maxExecutionTime);//maxExecutionTimeInSeconds);
-            la.setNoisePercentage(noisePercentage);//noisePercentage);
-            la.setMaxNrOfResults(maxNumberOfResults);//maxNrOfResults);
 
             la.init();
             logger.info("[DLLearner] Initialisation of learning algorithm done in " + (System.currentTimeMillis()-startTime) + "ms.");
@@ -137,7 +180,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         if(reasonerType.equals(ReasonerType.HERMIT_REASONER)){
             initHermitReasoner();
         } else if(reasonerType.equals(ReasonerType.SPARQL_REASONER)){
-            initSparqlReasoner();
+        	initPelletReasoner();//initSparqlReasoner();
         } else if(reasonerType.equals((ReasonerType.PELLET_REASONER))){
             initPelletReasoner();
         }
@@ -146,12 +189,10 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
 
     private void initSparqlReasoner() throws Exception{
-        logger.info("[DLLearner] init SparqlReasoner...");
+        logger.info("[DLLearner] init SPARQL reasoner...");
         long startTime = System.currentTimeMillis();
 
         try {
-
-
             reasoner = new SPARQLReasoner((SparqlEndpointKS)ks);
             reasoner.init();
 
@@ -164,7 +205,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
             e.printStackTrace();
         }
 
-        logger.info("[DLLearner] Sparql Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
+        logger.info("[DLLearner] SPARQL reasoner initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
 
@@ -183,7 +224,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
         reasoner.init();
 
-        logger.info("[DLLearner] Hermit Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
+        logger.info("[DLLearner] Hermit reasoner initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
 
@@ -191,22 +232,16 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         logger.info("[DLLearner] init Pellet Reasoner...");
         long startTime = System.currentTimeMillis();
 
-        OWLReasonerFactory pelletFactory = com.clarkparsia.pellet.owlapiv3.PelletReasonerFactory.getInstance();
-
-        OWLReasoner pellet = pelletFactory.createReasoner(project.getRootOntology());
-
-        OWLAPIReasoner baseReasoner = new OWLAPIReasoner(pellet);
-
+        OWLAPIReasoner baseReasoner = new OWLAPIReasoner(ks);
+        baseReasoner.setReasonerImplementation(ReasonerImplementation.PELLET);
         baseReasoner.init();
 
         // closed world reasoner
-        reasoner = new ClosedWorldReasoner(Collections.singleton(ks));
-        ((ClosedWorldReasoner)reasoner).setReasonerComponent(baseReasoner);
-
+        reasoner = new ClosedWorldReasoner(baseReasoner);
         //reasoner.setProgressMonitor(progressMonitor);TODO integrate progress monitor
         reasoner.init();
 
-        logger.info("[DLLearner] Hermit Reasoner Initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
+        logger.info("[DLLearner] Pellet reasoner initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
 
     }
 
@@ -214,8 +249,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
     @Override
     public void initKnowledgeSource(ReasonerType reasonerType, String sparqlEndpoint) throws Exception{
-
-        // TODO
+    	useEL = sparqlEndpoint != null;
 
         if (reasonerType.equals(ReasonerType.HERMIT_REASONER)){
             initOWLKnowledgeSoure();
@@ -226,16 +260,19 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     }
 
     private void initSparqlKnowledgeSource(String sparqlEndpoint) throws Exception{
-        logger.info("[DLLearner] init sparql knowledge source...");
+        logger.info("[DLLearner] init SPARQL knowledge source...");
 
         SparqlEndpoint ep = new SparqlEndpoint(new URL(sparqlEndpoint));
 
-        ks = new SparqlEndpointKS(ep);
-
+        KnowledgeSource schemaKs = new OWLAPIOntology(project.getRootOntology());
+        SparqlEndpointKS ks = new SparqlEndpointKS(ep, schemaKs);
         ((SparqlEndpointKS)ks).setUseCache(false);
-
         ks.init();
-        logger.info("[DLLearner] initialisation of sparql knowledge source done");
+        logger.info("[DLLearner] initialisation of SPARQL knowledge source done");
+        
+        logger.info("[DLLearner] generation of knowledge base sample...");
+        this.ks = generateKnowledgebaseSample(ks);
+        logger.info("[DLLearner] generation of knowledge base sample done");
     }
 
     private void initOWLKnowledgeSoure() throws Exception{
@@ -245,6 +282,29 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         ks.init();
 
         logger.info("[DLLearner] initialisation of OWL knowledge source done");
+    }
+    
+    private KnowledgeSource generateKnowledgebaseSample(SparqlEndpointKS ks) throws Exception{
+    	// extract sample of the knowledge base
+    	ClassBasedSampleGenerator sampleGen = new ClassBasedSampleGenerator(ks);
+    	sampleGen.addAllowedPropertyNamespaces(allowedPropertyNameSpaces);
+    	sampleGen.addIgnoredProperties(ignoredProperties);
+    	sampleGen.addAllowedObjectNamespaces(allowedObjectNamespaces);
+    	
+    	OWLOntology sampleOntology = sampleGen.getSample(selEntity.asOWLClass());
+    	
+    	// add schema ontology
+    	OWLOntology schemaOntology = project.getRootOntology();
+    	OWLOntologyManager man = OWLManager.createOWLOntologyManager();
+    	schemaOntology = man.createOntology(schemaOntology.getAxioms());
+    	man.removeAxioms(schemaOntology, schemaOntology.getAxioms(AxiomType.FUNCTIONAL_DATA_PROPERTY));
+		man.removeAxioms(schemaOntology, schemaOntology.getAxioms(AxiomType.DISJOINT_CLASSES));
+		man.removeAxioms(schemaOntology, schemaOntology.getAxioms(AxiomType.DATA_PROPERTY_RANGE));
+    	
+    	KnowledgeSource sampleKS = new OWLAPIOntology(sampleOntology);
+    	sampleKS.init();
+        
+        return sampleKS;
     }
 
 
@@ -266,6 +326,9 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
     @Override
     public List<EvaluatedDescriptionClass> getCurrentlyLearnedDescriptions() {
         List<EvaluatedDescriptionClass> result;
+        logger.info(la.toString());
+        logger.info(la.getCurrentlyBestDescriptions().toString());
+        logger.info(maxNrOfResults + "");
         if (la != null) {
             result = Collections.unmodifiableList((List<EvaluatedDescriptionClass>) la
                     .getCurrentlyBestEvaluatedDescriptions(maxNrOfResults, 0.5, true));
