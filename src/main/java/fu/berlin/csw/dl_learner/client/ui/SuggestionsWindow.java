@@ -75,6 +75,7 @@ public class SuggestionsWindow extends Window {
         configButton.setText("Configure Learning Algorithm");
         configButton.setWidth("100%");
         configButton.setHeight("100%");
+        configButton.addStyleName("button-style");
 
         configButton.addListener(new ButtonListenerAdapter(){
 

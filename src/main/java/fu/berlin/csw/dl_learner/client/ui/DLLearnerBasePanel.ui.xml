@@ -14,7 +14,7 @@
         }
     </ui:style>
     <g:HTMLPanel>
-        <g:Button width="100%" height="10" ui:field='dllearner'> Start DLLearner
+        <g:Button width="100%" height="10" ui:field='dllearner' addStyleNames="button-style"> Start DL-Learner
         </g:Button>
     </g:HTMLPanel>
 
