@@ -4,6 +4,7 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by lars on 04.06.15.
@@ -19,6 +20,9 @@ public class ServerReply implements Serializable {
     private int classExpressionId;
     private String context;
 
+    private List<Suggestion> suggestionsList;
+
+
     private Throwable throwable;
 
     public String getClassExpressionManchesterString() {
@@ -28,6 +32,16 @@ public class ServerReply implements Serializable {
     public void setClassExpressionManchesterString(String classExpressionManchesterString) {
         this.classExpressionManchesterString = classExpressionManchesterString;
     }
+
+    public void setSuggestionsList(List<Suggestion> suggestionsList){
+        this.suggestionsList = suggestionsList;
+    }
+
+    public List<Suggestion> getSuggestionsList(){
+        return this.suggestionsList;
+    }
+
+
 
     public void setClassExpressionId(int classExpressionId){
         this.classExpressionId = classExpressionId;
