@@ -23,7 +23,9 @@ import edu.stanford.bmir.protege.web.server.owlapi.OWLAPIProjectManager;
 import fu.berlin.csw.dl_learner.server.ClassDescriptionLearner;
 import fu.berlin.csw.dl_learner.server.Manager;
 import fu.berlin.csw.dl_learner.shared.ServerReply;
+import fu.berlin.csw.dl_learner.shared.Suggestion;
 import fu.berlin.csw.dl_learner.shared.SuggestionRequest;
+import org.dllearner.core.EvaluatedDescription;
 import org.dllearner.learningproblems.EvaluatedDescriptionClass;
 import org.dllearner.utilities.owl.OWLAPIRenderers;
 
@@ -56,7 +58,6 @@ public class SuggestionsWebSocketServer {
             // ask for solutions and send them to the client gradually
 
             timer.schedule(new TimerTask() {
-                int i = 0;
                 List<EvaluatedDescriptionClass> result;
 
                 @Override
@@ -66,28 +67,48 @@ public class SuggestionsWebSocketServer {
                     if ( !isCancelled(Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()))
                             &&  Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).isLearning()) {
 
-                            result = Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).getCurrentlyLearnedDescriptions();
-                            logger.info("[DLLearner] Currently learned descriptions: " + result.toString());
-                            if(result.size()>i){
+                        result = Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).getCurrentlyLearnedDescriptions();
+                        logger.info("[DLLearner] Currently learned descriptions: " + result.toString());
 
-                                for (EvaluatedDescriptionClass descr : Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).getCurrentlyLearnedDescriptions()){
-                                    if (!alreadySendDescriptions.contains(descr)){
-                                        alreadySendDescriptions.add(descr);
-                                        ServerReply suggestion = new ServerReply();
-                                        suggestion.setClassExpressionManchesterString(OWLAPIRenderers.toManchesterOWLSyntax(descr.getDescription()));
-                                        suggestion.setAccuracy(new Double(descr.getAccuracy()).toString());
-                                        suggestion.setClassExpressionId(descr.hashCode());  // ToDo: id instead of Hashcode
-                                        suggestion.setContext("Suggestion");
-                                        logger.info("[DLLearner] Send suggestion : " + result.toString());
-                                        sendSuggestion(suggestion, session);
-                                        i++;
-                                    }
+                        List<Suggestion> suggestionsList = new LinkedList<Suggestion>();
+
+
+                        for (EvaluatedDescriptionClass descr : result){
+
+
+
+                            Suggestion suggestion = new Suggestion( OWLAPIRenderers.toManchesterOWLSyntax(descr.getDescription()), descr.getAccuracy());
+                            suggestion.setId(descr.hashCode());
+                            suggestionsList.add(suggestion);
+
+                        }
+
+                        ServerReply reply = new ServerReply();
+                        reply.setSuggestionsList(suggestionsList);
+                        reply.setContext("Suggestion");
+                        sendSuggestion(reply, session);
+
+
+                        /*if(result.size()>i){
+
+                            for (EvaluatedDescriptionClass descr : Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).getCurrentlyLearnedDescriptions()){
+                                if (!alreadySendDescriptions.contains(descr)){
+                                    alreadySendDescriptions.add(descr);
+                                    ServerReply suggestion = new ServerReply();
+                                    suggestion.setClassExpressionManchesterString(OWLAPIRenderers.toManchesterOWLSyntax(descr.getDescription()));
+                                    suggestion.setAccuracy(new Double(descr.getAccuracy()).toString());
+                                    suggestion.setClassExpressionId(descr.hashCode());  // ToDo: id instead of Hashcode
+                                    suggestion.setContext("Suggestion");
+                                    logger.info("[DLLearner] Send suggestion : " + result.toString());
+                                    sendSuggestion(suggestion, session);
+                                    i++;
                                 }
                             }
+                        }*/
                     }
                 }
 
-            }, 100, 50);
+            }, 100, 200);
 
             Manager.getInstance().getProjectRelatedLearner(request.getProjectId(), request.getUserId()).startLearning();
 
