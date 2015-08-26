@@ -68,8 +68,10 @@ public class SuggestionsPresenter implements WebSocketHandler {
 
             //  add class description suggestion
 
+            GWT.log("Received suggestions list with size : " + reply.getSuggestionsList().size());
 
-            suggestionsListView.addSuggestion(reply);
+            //suggestionsListView.addSuggestion(reply);
+            suggestionsListView.setList(reply.getSuggestionsList());
         }
 
     }

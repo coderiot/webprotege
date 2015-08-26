@@ -315,7 +315,7 @@ public class SuggestionsWindow extends Window {
 
 
     public int getSelectedClassExpressionId(){
-        return suggestionsListView.getSelectedSuggestion().getClassExpressionId();
+        return suggestionsListView.getSelectedSuggestion().getId();
     }
 
 
