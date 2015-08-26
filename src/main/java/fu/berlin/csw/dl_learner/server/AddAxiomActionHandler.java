@@ -39,13 +39,13 @@ public class AddAxiomActionHandler extends AbstractHasProjectActionHandler<AddAx
         logger.info("[DLLearner] add axiom...");
 
 
-        String resultMessage = "class expression succesful added";
+        String resultMessage = "class expression succesfully added";
         ClassDescriptionLearner learner = Manager.getInstance().getProjectRelatedLearner(project.getProjectId(), executionContext.getUserId());
 
         learner.addLearnedDescriptionToProject(action.getClassExpressionId());
 
 
-        logger.info("[DLLearner] class expression successful added!");
+        logger.info("[DLLearner] class expression successfully added!");
 
 
         return new AddAxiomResult(resultMessage);

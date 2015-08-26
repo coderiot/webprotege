@@ -24,6 +24,7 @@
         <mail.smtp.auth/>
         <mail.smtp.port/>
         <application.analytics/>
+        <dllearner.version>1.2-SNAPSHOT</dllearner.version> 
     </properties>
 
     <repositories>
@@ -277,7 +278,7 @@
         <dependency>
             <groupId>org.dllearner</groupId>
             <artifactId>components-core</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>${dllearner.version}</version>
         </dependency>
 
         <dependency>
