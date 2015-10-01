@@ -180,7 +180,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         if(reasonerType.equals(ReasonerType.HERMIT_REASONER)){
             initHermitReasoner();
         } else if(reasonerType.equals(ReasonerType.SPARQL_REASONER)){
-        	initPelletReasoner();//initSparqlReasoner();
+        	initSparqlReasoner();
         } else if(reasonerType.equals((ReasonerType.PELLET_REASONER))){
             initPelletReasoner();
         }
@@ -238,7 +238,7 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 
         // closed world reasoner
         reasoner = new ClosedWorldReasoner(baseReasoner);
-        //reasoner.setProgressMonitor(progressMonitor);TODO integrate progress monitor
+
         reasoner.init();
 
         logger.info("[DLLearner] Pellet reasoner initialisation done in " + (System.currentTimeMillis() - startTime) + "ms.");
@@ -351,7 +351,6 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
         logger.info("[DLLearner] finished learning of " +
                 axiomType.getName() + " axioms");
 
-//        this.bestEvaluatedDescriptions = getCurrentlyLearnedDescriptions();
 
 
 
@@ -378,7 +377,6 @@ public class DLLearnerAdapter implements ClassDescriptionLearner {//implements M
 			OWLClassExpression subequivclass = null;
 			OWLAxiom axiomToAdd = null;
 			
-			/*ToDo id instead of hashcode*/
 			for (EvaluatedDescriptionClass evaluatedDescr : bestEvaluatedDescriptions){
 			    if (classExpressionId == evaluatedDescr.getDescription().hashCode()){
 			        subequivclass = evaluatedDescr.getDescription();

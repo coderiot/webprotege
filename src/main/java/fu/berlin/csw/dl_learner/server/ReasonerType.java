@@ -11,7 +11,6 @@ public enum ReasonerType {
     /* Hermit Reasoner can be used with the local OWL Ontology */
     HERMIT_REASONER,
 
-
     /* Pellet Reasoner can be used with the local OWL Ontology */
     PELLET_REASONER
 
